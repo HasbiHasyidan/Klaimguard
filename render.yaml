@@ -26,8 +26,3 @@ services:
     # Health check endpoint
     healthCheckPath: /health
 
-    disk:
-      name: klaimguard-data
-      mountPath: /data
-      sizeGB: 1                           
-
