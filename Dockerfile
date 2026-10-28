@@ -23,8 +23,9 @@ RUN python -m backend.scripts.init_db \
 
 # Entrypoint script for deploy
 COPY start-render.sh /app/start-render.sh
-RUN chmod +x /app/start-render.sh
+RUN chmod +x /app/start-render.sh \
+    && chmod -R 777 /app
 
-EXPOSE 8000
+EXPOSE 7860
 
 CMD ["/app/start-render.sh"]

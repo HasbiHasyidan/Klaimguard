@@ -1,3 +1,12 @@
+---
+title: KlaimGuard
+emoji: 🛡️
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+---
+
 # KlaimGuard AI
 
 Prototype Healthkaton untuk analisis sintetis klaim JKN dan simulasi permintaan klarifikasi BPJS–rumah sakit.
