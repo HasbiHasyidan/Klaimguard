@@ -6,7 +6,7 @@ import sys
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 BACKEND_DIR = Path(__file__).resolve().parent
@@ -51,11 +51,12 @@ app = FastAPI(
 # Konfigurasi CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  
-    allow_credentials=False,  
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 @app.exception_handler(Exception)
 async def handle_unexpected_exception(
@@ -85,8 +86,8 @@ def health_check() -> dict[str, str]:
   return {"status": "ok", "timestamp": datetime.now(timezone.utc).isoformat()}
 
 
-@app.get("/", tags=["Root"])
-def root():
+@app.get("/api/info", tags=["Root"])
+def api_info():
   return {
       "service": "KlaimGuard API",
       "status": "running",
@@ -107,9 +108,16 @@ app.include_router(disputes_router)
 app.include_router(rs_portal_router)
 app.include_router(facilities_router)
 
+
+@app.get("/app", include_in_schema=False)
+def redirect_app_to_root():
+  return RedirectResponse(url="/", status_code=301)
+
+
 if FRONTEND_DIR.exists() and (FRONTEND_DIR / "index.html").exists():
+  # Mount frontend di root "/" sehingga saat URL dibuka langsung tampil web UI
   app.mount(
-      "/app",
+      "/",
       StaticFiles(directory=str(FRONTEND_DIR), html=True),
       name="frontend",
   )
@@ -117,6 +125,5 @@ if FRONTEND_DIR.exists() and (FRONTEND_DIR / "index.html").exists():
 if __name__ == "__main__":
   import uvicorn
 
-  # Port 7860 wajib untuk Hugging Face Spaces
-  port = int(os.environ.get("PORT", 7860))
-  uvicorn.run("app:app", host="0.0.0.0", port=port, reload=False)
+  port = int(os.environ.get("PORT", 8000))
+  uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)

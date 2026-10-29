@@ -1,11 +1,36 @@
 services:
-  klaimguard-app:
+  klaimguard:
+    container_name: klaimguard-ai
     build:
       context: .
       dockerfile: Dockerfile
+    image: klaimguard-ai:latest
     ports:
+      # Port akses klaimguard
+      - "80:8000"
+      # Port alternatif backend
       - "8000:8000"
+    environment:
+      - PORT=8000
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+      # Session cookie
+      - KLAIMGUARD_AUTH_SECRET=klaimguard-enterprise-secret-key-healthkaton2026
+      # Cookie secure
+      - KLAIMGUARD_COOKIE_SECURE=false
     volumes:
-      - ./backend/regulation_docs:/app/backend/regulation_docs
-      - ./backend/ml_models:/app/backend/ml_models
+      # Data persisten SQLite, model XGBoost, ChromaDB, dan berkas upload rumah sakit
+      - klaimguard-data:/data
+      # Mount folder regulasi PDF resmi (read-only)
+      - ./backend/regulation_docs:/app/backend/regulation_docs:ro
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 25s
+
+volumes:
+  klaimguard-data:
+    driver: local

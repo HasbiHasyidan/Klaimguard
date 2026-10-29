@@ -21,11 +21,11 @@ RUN python -m backend.scripts.init_db \
     && python -m backend.scripts.seed_rs_demo \
     && python -m backend.scripts.train_xgboost
 
-# Entrypoint script for deploy
-COPY start-render.sh /app/start-render.sh
-RUN chmod +x /app/start-render.sh \
+# Entrypoint script for container startup
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh \
     && chmod -R 777 /app
 
-EXPOSE 7860
+EXPOSE 8000
 
-CMD ["/app/start-render.sh"]
+CMD ["/app/entrypoint.sh"]

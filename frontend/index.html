@@ -1,696 +1,1066 @@
 <!doctype html>
 <html lang="id">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta
-      name="description"
-      content="Dashboard audit klaim INA-CBG untuk verifikator medis."
-    />
-    <title>KlaimGuard AI | Audit Klaim</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <link rel="stylesheet" href="css/variables.css?v=enterprise-8" />
-    <link rel="stylesheet" href="css/base.css?v=enterprise-10" />
-    <link rel="stylesheet" href="css/components/buttons.css?v=enterprise-8" />
-    <link rel="stylesheet" href="css/components/cards.css?v=enterprise-8" />
-    <link rel="stylesheet" href="css/components/table.css?v=enterprise-8" />
-    <link rel="stylesheet" href="css/components/modal.css?v=enterprise-8" />
-    <link rel="stylesheet" href="css/components/pagination.css?v=enterprise-8" />
-    <link rel="stylesheet" href="css/components/chatbot.css?v=enterprise-8" />
-    <link rel="stylesheet" href="css/components/disputes.css?v=enterprise-22" />
-  </head>
-  <body>
-    <section class="login-view" id="loginView" aria-labelledby="loginTitle">
-      <div class="login-card">
-        <img src="assets/logo.svg?v=enterprise-8" alt="KlaimGuard AI" class="login-logo" />
-          <p class="eyebrow">AKSES ADMIN KLAIMGUARD</p>
-        <h1 id="loginTitle">Masuk ke KlaimGuard AI</h1>
-        <p class="login-subtitle">Masuk sebagai Admin Verifikator atau Petugas Klaim RS.</p>
-        <form id="loginForm">
-          <label for="loginUsername">Username</label>
-          <input id="loginUsername" name="username" type="text" autocomplete="username" required />
-          <label for="loginPassword">Password</label>
-          <div class="password-input-wrap">
-            <input id="loginPassword" name="password" type="password" autocomplete="current-password" required />
-            <button class="password-toggle" id="togglePasswordButton" type="button" aria-label="Tampilkan password" aria-pressed="false">
-              <svg class="password-eye-show" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
-              <svg class="password-eye-hide is-hidden" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.2A10.7 10.7 0 0 1 12 5c6.5 0 10 7 10 7a15 15 0 0 1-3.1 3.9M6.2 6.2C3.5 8 2 12 2 12s3.5 7 10 7c1 0 2-.2 2.8-.5"/></svg>
-            </button>
-          </div>
-          <button class="button button-primary login-submit" type="submit" id="loginButton">Masuk</button>
-          <p class="login-error" id="loginError" role="alert" aria-live="polite"></p>
-        </form>
-      </div>
-    </section>
-    <div class="app-container is-hidden" id="appContainer">
-      <aside class="sidebar" id="appSidebar">
-        <a class="sidebar-brand" href="/" aria-label="KlaimGuard AI beranda">
-          <span class="logo-wrapper">
-            <img id="mainLogo" class="logo-full" src="assets/logo.svg?v=enterprise-8" alt="KlaimGuard AI" />
-            <img id="mainLogoIcon" class="logo-collapsed" src="assets/logo-icon.svg?v=enterprise-8" alt="KlaimGuard" />
-          </span>
-        </a>
-        <nav class="sidebar-nav" aria-label="Navigasi utama">
-          <button class="nav-item active" type="button" data-tab="dashboard" title="Dashboard" aria-label="Dashboard">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="5" rx="1"/><rect x="13" y="10" width="8" height="11" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/></svg><span class="nav-label">Dashboard</span>
-          </button>
-          <button class="nav-item" id="batchNavItem" type="button" data-tab="batch" title="Batch Analysis" aria-label="Batch Analysis">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h16"/><circle cx="8" cy="5" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="10" cy="19" r="2"/></svg><span class="nav-label">Batch Analysis</span>
-          </button>
-          <button class="nav-item" type="button" data-tab="audit" title="Audit Trail" aria-label="Audit Trail">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.64-6.36L3 8"/><path d="M3 3v5h5m4-1v5l3 2"/></svg><span class="nav-label">Audit History</span>
-          </button>
-          <button class="nav-item" id="facilityNavItem" type="button" data-tab="facilities" title="Manajemen Faskes" aria-label="Manajemen Faskes">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 10h.01M15 10h.01M9 14h.01M15 14h.01M10 21v-4h4v4"/></svg><span class="nav-label">Manajemen Faskes</span>
-          </button>
-          <button class="nav-item" type="button" data-tab="disputes" title="Klarifikasi" aria-label="Klarifikasi">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v13H9l-5 4z"/><path d="M8 9h8M8 13h5"/></svg><span class="nav-label">Klarifikasi</span>
-          </button>
-          <button class="nav-item" type="button" data-tab="reports" title="Reports" aria-label="Reports">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5m0 14h17"/><path d="m7 15 4-4 3 2 5-6"/></svg><span class="nav-label">Reports</span>
-          </button>
-          <button class="nav-item" type="button" data-tab="assistant" title="KlaimGuard Assistant" aria-label="KlaimGuard Assistant">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5a4 4 0 0 1 8 0c0 2-1 3-3 4v2m-2 4h.01M6 21h12"/><path d="M7 21v-2a5 5 0 0 1 10 0v2"/></svg><span class="nav-label">KlaimGuard Assistant</span>
-          </button>
-        </nav>
-        <div class="sidebar-footer"><span class="sidebar-status-dot"></span> INA-CBG ENGINE <strong>v5.5</strong></div>
-      </aside>
 
-      <div class="main-content">
-        <header class="top-header" id="topHeader">
-          <div class="header-left">
-            <button class="icon-button sidebar-toggle" id="sidebarToggleBtn" type="button" aria-label="Toggle Sidebar" aria-expanded="true" aria-controls="appSidebar" title="Buka/Tutup Sidebar">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-            </button>
-            <span id="connectionStatus" class="status-badge status-connected" role="status" aria-live="polite"><span class="status-dot" aria-hidden="true"></span><span class="status-text">Menghubungkan ke INA-CBGs Engine</span></span>
-          </div>
-          <div class="header-right">
-            <button class="icon-button theme-toggle" id="themeToggleBtn" type="button" aria-label="Aktifkan mode gelap" title="Ganti tema">
-              <span aria-hidden="true">☾</span>
-            </button>
-            <div class="profile-chip" aria-label="Pengguna aktif">
-              <span class="profile-avatar" aria-hidden="true">VM</span>
-              <span class="profile-name" id="profileName">Admin</span>
-              <span class="profile-role" id="profileRole">Administrator</span>
-              <button class="button button-quiet logout-button" id="logoutButton" type="button">Keluar</button>
-            </div>
-          </div>
-        </header>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Dashboard audit klaim INA-CBG untuk verifikator medis." />
+  <title>KlaimGuard AI | Audit Klaim</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link rel="stylesheet" href="css/variables.css?v=enterprise-8" />
+  <link rel="stylesheet" href="css/base.css?v=enterprise-10" />
+  <link rel="stylesheet" href="css/components/buttons.css?v=enterprise-8" />
+  <link rel="stylesheet" href="css/components/cards.css?v=enterprise-8" />
+  <link rel="stylesheet" href="css/components/table.css?v=enterprise-8" />
+  <link rel="stylesheet" href="css/components/modal.css?v=enterprise-8" />
+  <link rel="stylesheet" href="css/components/pagination.css?v=enterprise-8" />
+  <link rel="stylesheet" href="css/components/chatbot.css?v=enterprise-8" />
+  <link rel="stylesheet" href="css/components/disputes.css?v=enterprise-22" />
+</head>
 
-        <main class="workspace tab-panel" id="dashboardTab">
-      <section class="page-heading" aria-labelledby="pageTitle">
-        <div>
-          <p class="eyebrow">DATASET FKRTL AKTIF</p>
-          <h2 id="pageTitle">Dashboard Verifikasi Klaim</h2>
-          <p class="page-subtitle">FKRTL adalah Fasilitas Kesehatan Rujukan Tingkat Lanjutan, termasuk rumah sakit. Pantau kesesuaian klinis dan tarif INA-CBG.</p>
+<body>
+  <section class="login-view" id="loginView" aria-labelledby="loginTitle">
+    <div class="login-card">
+      <img src="assets/logo.svg?v=enterprise-8" alt="KlaimGuard" class="login-logo" />
+      <p class="eyebrow">AKSES ADMIN KLAIMGUARD</p>
+      <h1 id="loginTitle">Masuk ke KlaimGuard</h1>
+      <p class="login-subtitle">Masuk sebagai Admin Verifikator atau Petugas Klaim RS.</p>
+      <form id="loginForm">
+        <label for="loginUsername">Username</label>
+        <input id="loginUsername" name="username" type="text" autocomplete="username" required />
+        <label for="loginPassword">Password</label>
+        <div class="password-input-wrap">
+          <input id="loginPassword" name="password" type="password" autocomplete="current-password" required />
+          <button class="password-toggle" id="togglePasswordButton" type="button" aria-label="Tampilkan password"
+            aria-pressed="false">
+            <svg class="password-eye-show" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            <svg class="password-eye-hide is-hidden" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8" />
+              <path
+                d="M9.9 5.2A10.7 10.7 0 0 1 12 5c6.5 0 10 7 10 7a15 15 0 0 1-3.1 3.9M6.2 6.2C3.5 8 2 12 2 12s3.5 7 10 7c1 0 2-.2 2.8-.5" />
+            </svg>
+          </button>
         </div>
-        <div class="coverage-indicator">
-          <div class="coverage-copy"><span class="coverage-label">Cakupan verifikasi manusia</span><span class="coverage-definition">Klaim dengan keputusan verifikator tersimpan dibagi seluruh klaim.</span></div>
-          <strong id="auditCoverage">--%</strong>
-        </div>
-      </section>
-
-      <section class="kpi-grid" id="kpiContainer" aria-label="Ringkasan klaim">
-        <div class="kpi-skeleton"></div>
-        <div class="kpi-skeleton"></div>
-        <div class="kpi-skeleton"></div>
-        <div class="kpi-skeleton"></div>
-        <div class="kpi-skeleton"></div>
-      </section>
-
-      <section class="manual-form-section" aria-labelledby="manualFormTitle">
-        <button class="button button-quiet btn-outline manual-form-toggle" id="toggleManualFormBtn" type="button" aria-expanded="false" aria-controls="manualFormCollapse">
-          <span class="manual-form-toggle-icon" aria-hidden="true">+</span>
-          <span id="manualFormTitle">Uji Verifikasi Klaim Manual</span>
+        <button class="button button-primary login-submit" type="submit" id="loginButton">Masuk</button>
+        <p class="login-error" id="loginError" role="alert" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+  <div class="app-container is-hidden" id="appContainer">
+    <aside class="sidebar" id="appSidebar">
+      <a class="sidebar-brand" href="/" aria-label="KlaimGuard AI beranda">
+        <span class="logo-wrapper">
+          <img id="mainLogo" class="logo-full" src="assets/logo.svg?v=enterprise-8" alt="KlaimGuard AI" />
+          <img id="mainLogoIcon" class="logo-collapsed" src="assets/logo-icon.svg?v=enterprise-8" alt="KlaimGuard" />
+        </span>
+      </a>
+      <nav class="sidebar-nav" aria-label="Navigasi utama">
+        <button class="nav-item active" type="button" data-tab="dashboard" title="Dashboard" aria-label="Dashboard">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="3" width="8" height="8" rx="1" />
+            <rect x="13" y="3" width="8" height="5" rx="1" />
+            <rect x="13" y="10" width="8" height="11" rx="1" />
+            <rect x="3" y="13" width="8" height="8" rx="1" />
+          </svg><span class="nav-label">Dashboard</span>
         </button>
-        <div class="manual-form-panel" id="manualFormCollapse" aria-hidden="true">
-          <div class="manual-form-panel-inner">
-            <p>Analisis satu klaim berdasarkan catatan klinis dan kode billing.</p>
-            <form id="claimForm" class="manual-claim-form">
-              <label>ID Klaim<input id="claimIdInput" name="claim_id" type="text" placeholder="CLM-05501" required /></label>
-              <label class="notes-field">Catatan Dokter<input id="doctorNotesInput" name="doctor_notes" type="text" placeholder="Ringkasan kondisi dan tindakan medis" required /></label>
-              <label>Kode ICD<input id="billingCodesInput" name="admin_billing_code" type="text" placeholder="A09, K52.9" required /></label>
-              <label>Lama Rawat<select id="lengthOfStayInput" name="length_of_stay"><option value="1">1 hari</option><option value="2">2 hari</option><option value="3">3 hari</option><option value="5">5 hari</option><option value="7">7 hari</option><option value="14">14 hari</option></select></label>
-              <label>Total Biaya<input id="totalChargeInput" name="total_charge" type="number" min="0" step="any" placeholder="0" required /></label>
-              <button class="button button-primary" type="submit" id="analyzeClaimBtn">Analisis Klaim</button>
-            </form>
-            <div id="manualResult" class="manual-result hidden" aria-live="polite"></div>
+        <button class="nav-item" id="batchNavItem" type="button" data-tab="batch" title="Batch Analysis"
+          aria-label="Batch Analysis">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 5h16M4 12h16M4 19h16" />
+            <circle cx="8" cy="5" r="2" />
+            <circle cx="16" cy="12" r="2" />
+            <circle cx="10" cy="19" r="2" />
+          </svg><span class="nav-label">Batch Analysis</span>
+        </button>
+        <button class="nav-item" type="button" data-tab="audit" title="Audit Trail" aria-label="Audit Trail">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 12a9 9 0 1 0 2.64-6.36L3 8" />
+            <path d="M3 3v5h5m4-1v5l3 2" />
+          </svg><span class="nav-label">Audit History</span>
+        </button>
+        <button class="nav-item" id="facilityNavItem" type="button" data-tab="facilities" title="Manajemen Faskes"
+          aria-label="Manajemen Faskes">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 21h18M5 21V7l7-4 7 4v14M9 10h.01M15 10h.01M9 14h.01M15 14h.01M10 21v-4h4v4" />
+          </svg><span class="nav-label">Manajemen Faskes</span>
+        </button>
+        <button class="nav-item" type="button" data-tab="disputes" title="Klarifikasi" aria-label="Klarifikasi">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 4h16v13H9l-5 4z" />
+            <path d="M8 9h8M8 13h5" />
+          </svg><span class="nav-label">Klarifikasi</span>
+        </button>
+        <button class="nav-item" type="button" data-tab="reports" title="Reports" aria-label="Reports">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 19V5m0 14h17" />
+            <path d="m7 15 4-4 3 2 5-6" />
+          </svg><span class="nav-label">Reports</span>
+        </button>
+        <button class="nav-item" type="button" data-tab="assistant" title="KlaimGuard Assistant"
+          aria-label="KlaimGuard Assistant">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M8 5a4 4 0 0 1 8 0c0 2-1 3-3 4v2m-2 4h.01M6 21h12" />
+            <path d="M7 21v-2a5 5 0 0 1 10 0v2" />
+          </svg><span class="nav-label">KlaimGuard Assistant</span>
+        </button>
+      </nav>
+      <div class="sidebar-footer"><span class="sidebar-status-dot"></span> INA-CBG ENGINE <strong>v5.5</strong></div>
+    </aside>
+
+    <div class="main-content">
+      <header class="top-header" id="topHeader">
+        <div class="header-left">
+          <button class="icon-button sidebar-toggle" id="sidebarToggleBtn" type="button" aria-label="Toggle Sidebar"
+            aria-expanded="true" aria-controls="appSidebar" title="Buka/Tutup Sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              aria-hidden="true">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <span id="connectionStatus" class="status-badge status-connected" role="status" aria-live="polite"><span
+              class="status-dot" aria-hidden="true"></span><span class="status-text">Menghubungkan ke INA-CBGs
+              Engine</span></span>
+        </div>
+        <div class="header-right">
+          <button class="icon-button theme-toggle" id="themeToggleBtn" type="button" aria-label="Aktifkan mode gelap"
+            title="Ganti tema">
+            <span aria-hidden="true">☾</span>
+          </button>
+          <div class="profile-chip" aria-label="Pengguna aktif">
+            <span class="profile-avatar" aria-hidden="true">VM</span>
+            <span class="profile-name" id="profileName">Admin</span>
+            <span class="profile-role" id="profileRole">Administrator</span>
+            <button class="button button-quiet logout-button" id="logoutButton" type="button">Keluar</button>
           </div>
         </div>
-      </section>
+      </header>
 
-      <section class="claims-section" aria-labelledby="claimsTitle">
-        <div class="section-heading">
+      <main class="workspace tab-panel" id="dashboardTab">
+        <section class="page-heading" aria-labelledby="pageTitle">
           <div>
-            <div class="section-title-line">
-              <h2 id="claimsTitle">Daftar Klaim</h2>
-              <span class="live-label"><span></span> DATA LIVE</span>
+            <p class="eyebrow">DATASET FKRTL AKTIF</p>
+            <h2 id="pageTitle">Dashboard Verifikasi Klaim</h2>
+            <p class="page-subtitle">FKRTL adalah Fasilitas Kesehatan Rujukan Tingkat Lanjutan, termasuk rumah sakit.
+              Pantau kesesuaian klinis dan tarif INA-CBG.</p>
+          </div>
+          <div class="coverage-indicator">
+            <div class="coverage-copy"><span class="coverage-label">Cakupan verifikasi manusia</span><span
+                class="coverage-definition">Klaim dengan keputusan verifikator tersimpan dibagi seluruh klaim.</span>
             </div>
-            <p id="resultSummary">Menyiapkan data audit</p>
+            <strong id="auditCoverage">--%</strong>
           </div>
-          <div class="section-actions">
-            <button class="button button-quiet" id="refreshButton" type="button">
-              <span aria-hidden="true">↻</span> Perbarui
-            </button>
-            <button class="button button-primary" id="batchAuditBtn" type="button">
-              <span class="button-icon" aria-hidden="true">◈</span>
-              <span class="button-label">Audit 100 Klaim</span>
-            </button>
-          </div>
-        </div>
+        </section>
 
-        <div class="filter-bar">
-          <label class="search-field" for="claimSearch"><span aria-hidden="true">⌕</span><input id="claimSearch" type="search" placeholder="Cari ID klaim, SEP, atau catatan klinis…" autocomplete="off" /></label>
-          <label class="filter-control" for="statusFilter"><span>Status</span><select id="statusFilter"><option value="">Semua Status</option><option value="fraud">Anomali / Flagged</option><option value="safe">Aman / Safe</option></select></label>
-          <label class="filter-control" for="categoryFilter"><span>Kategori</span><select id="categoryFilter"><option value="">Semua kategori</option><option value="upcoding">Upcoding</option><option value="unbundling">Unbundling</option></select></label>
-          <label class="filter-control page-size-control" for="pageSize"><span>Baris</span><select id="pageSize"><option value="10" selected>10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select></label>
-        </div>
-        <div class="table-frame">
-          <div class="table-scroll" id="tableScroll">
-            <table id="resultsTable" class="claims-table results-table-new">
-              <thead>
-                <tr>
-                  <th scope="col">No</th>
-                  <th scope="col">ID Klaim / SEP</th>
-                  <th scope="col">Catatan Dokter</th>
-                  <th scope="col">Tindakan (ICD)</th>
-                  <th scope="col">Total Biaya</th>
-                  <th scope="col">Status</th>
-                  <th scope="col" class="action-column">DETAIL</th>
-                </tr>
-              </thead>
-              <tbody id="claimsTableBody">
-                <tr>
-                  <td colspan="7" class="table-message">Memuat klaim…</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div id="paginationContainer" class="pagination-container"></div>
-        </div>
-      </section>
-        </main>
+        <section class="kpi-grid" id="kpiContainer" aria-label="Ringkasan klaim">
+          <div class="kpi-skeleton"></div>
+          <div class="kpi-skeleton"></div>
+          <div class="kpi-skeleton"></div>
+          <div class="kpi-skeleton"></div>
+          <div class="kpi-skeleton"></div>
+        </section>
 
-        <main class="workspace tab-panel hidden" id="batchTab">
-          <section class="page-heading"><div><p class="eyebrow">PEMROSESAN TERKENDALI</p><h2>Batch Analysis</h2><p class="page-subtitle">Jalankan pemeriksaan pada dataset klaim aktif.</p></div></section>
-          <section class="batch-layout" aria-label="Pengaturan dan parameter batch">
-            <div class="work-section batch-work-section">
-              <div class="section-heading compact-heading"><div><h2>Simulasi Batch</h2><p>Pilih volume klaim untuk menjalankan penapisan.</p></div></div>
-              <div class="batch-size-chips" role="group" aria-label="Pilih ukuran batch">
-                <button class="batch-size-chip is-active" type="button" data-batch-size="100">100 Klaim</button>
-                <button class="batch-size-chip" type="button" data-batch-size="500">500 Klaim</button>
-                <button class="batch-size-chip" type="button" data-batch-size="1000">1.000 Klaim</button>
-                <button class="batch-size-chip" type="button" data-batch-size="5000">5.000 Klaim</button>
-              </div>
-              <form id="batchAuditForm" class="batch-form">
-                <label for="batchLimit">Jumlah klaim</label><input id="batchLimit" type="number" min="1" max="5500" step="1" value="100" required />
-                <button class="button button-primary" type="submit" id="batchRunButton"><span class="button-icon" aria-hidden="true">◈</span><span class="button-label">Jalankan Batch</span></button>
+        <section class="manual-form-section" aria-labelledby="manualFormTitle">
+          <button class="button button-quiet btn-outline manual-form-toggle" id="toggleManualFormBtn" type="button"
+            aria-expanded="false" aria-controls="manualFormCollapse">
+            <span class="manual-form-toggle-icon" aria-hidden="true">+</span>
+            <span id="manualFormTitle">Uji Verifikasi Klaim Manual</span>
+          </button>
+          <div class="manual-form-panel" id="manualFormCollapse" aria-hidden="true">
+            <div class="manual-form-panel-inner">
+              <p>Analisis satu klaim berdasarkan catatan klinis dan kode billing.</p>
+              <form id="claimForm" class="manual-claim-form">
+                <label>ID Klaim<input id="claimIdInput" name="claim_id" type="text" placeholder="CLM-05501"
+                    required /></label>
+                <label class="notes-field">Catatan Dokter<input id="doctorNotesInput" name="doctor_notes" type="text"
+                    placeholder="Ringkasan kondisi dan tindakan medis" required /></label>
+                <label>Kode ICD<input id="billingCodesInput" name="admin_billing_code" type="text"
+                    placeholder="A09, K52.9" required /></label>
+                <label>Lama Rawat<select id="lengthOfStayInput" name="length_of_stay">
+                    <option value="1">1 hari</option>
+                    <option value="2">2 hari</option>
+                    <option value="3">3 hari</option>
+                    <option value="5">5 hari</option>
+                    <option value="7">7 hari</option>
+                    <option value="14">14 hari</option>
+                  </select></label>
+                <label>Total Biaya<input id="totalChargeInput" name="total_charge" type="number" min="0" step="any"
+                    placeholder="0" required /></label>
+                <button class="button button-primary" type="submit" id="analyzeClaimBtn">Analisis Klaim</button>
               </form>
-              <div class="batch-results hidden" id="batchResults" aria-live="polite"></div>
-              <div class="batch-summary hidden" id="batchSummary" aria-live="polite"></div>
-            </div>
-            <aside class="work-section model-performance" aria-labelledby="modelPerformanceTitle">
-              <h2 id="modelPerformanceTitle">Parameter &amp; Performa Model</h2>
-              <dl>
-                <div><dt>Throughput</dt><dd>~1.1 ms/klaim</dd></div>
-                <div><dt>Knowledge Base</dt><dd>6 Regulasi Kemenkes</dd></div>
-                <div><dt>Engine</dt><dd>Dual-Engine XGBoost + Rule Engine</dd></div>
-              </dl>
-            </aside>
-          </section>
-          <section class="batch-result-table-section hidden" id="batchResultTableSection" aria-labelledby="batchResultsTitle">
-            <div class="section-heading"><div><h2 id="batchResultsTitle">Hasil Pemeriksaan Batch</h2><p>Klaim yang dianalisis pada simulasi ini.</p></div></div>
-            <div class="table-frame">
-              <div class="table-scroll">
-                <table class="claims-table results-table-new">
-                  <thead><tr><th>No</th><th>ID Klaim / SEP</th><th>Catatan Dokter</th><th>Tindakan (ICD)</th><th>Total Biaya</th><th>Status</th><th class="action-column">DETAIL</th></tr></thead>
-                  <tbody id="batchResultsTableBody"><tr><td colspan="7" class="table-message">Hasil batch akan tampil di sini.</td></tr></tbody>
-                </table>
-              </div>
-              <div id="batchResultsPaginationContainer" class="pagination-container"></div>
-            </div>
-          </section>
-        </main>
-
-        <main class="workspace tab-panel hidden" id="auditTab">
-          <section class="page-heading"><div><p class="eyebrow">JEJAK VERIFIKASI</p><h2>Audit Trail</h2><p class="page-subtitle">Riwayat keputusan admin BPJS dan catatan verifikasi.</p></div><button class="button button-quiet" id="refreshAuditButton" type="button">↻ Perbarui</button></section>
-          <section class="work-section"><div class="table-frame"><div class="table-scroll"><table class="claims-table"><thead><tr><th>Waktu</th><th>ID Klaim</th><th>Admin</th><th>Aksi</th><th>Catatan</th></tr></thead><tbody id="auditHistoryBody"><tr><td colspan="5" class="table-message">Memuat riwayat…</td></tr></tbody></table></div><div id="auditPagination" class="pagination-container"></div></div></section>
-          <section class="work-section"><div class="section-heading compact-heading"><div><h2>Aktivitas Portal RS</h2><p>Aktivitas pengguna rumah sakit terkait klarifikasi dan dokumen.</p></div></div><div class="table-frame"><div class="table-scroll"><table class="claims-table"><thead><tr><th>Waktu</th><th>Petugas</th><th>Faskes</th><th>ID Klarifikasi</th><th>Aksi</th><th>Versi / Detail</th></tr></thead><tbody id="hospitalActivityBody"><tr><td colspan="6" class="table-message">Memuat aktivitas RS…</td></tr></tbody></table></div><div id="hospitalActivityPagination" class="pagination-container"></div></div></section>
-        </main>
-
-        <main class="workspace tab-panel hidden" id="facilitiesTab">
-          <section class="page-heading"><div><p class="eyebrow">ADMIN BPJS</p><h2>Manajemen Faskes</h2><p class="page-subtitle">Daftarkan fasilitas kesehatan, buat akun petugas RS, dan alokasikan klaim.</p></div><button class="button button-quiet" id="refreshFacilitiesButton" type="button">Perbarui</button></section>
-          <section class="facility-management-grid">
-            <form class="work-section facility-create-form" id="facilityCreateForm">
-              <div class="section-heading compact-heading"><div><h2>Daftarkan faskes</h2><p>Akun petugas dibuat untuk portal RS. Password disimpan dalam bentuk hash.</p></div></div>
-              <label>Nama resmi faskes<input id="facilityNameInput" required maxlength="160" placeholder="Contoh: RS Sehat Sentosa" /></label>
-              <label>Kode faskes<input id="facilityCodeInput" required maxlength="30" placeholder="Contoh: 0001R001" /></label>
-              <label>Alamat<textarea id="facilityAddressInput" maxlength="1000" rows="3" placeholder="Alamat fasilitas kesehatan"></textarea></label>
-              <div class="facility-form-divider"><span>Akun petugas RS</span></div>
-              <label>Username<input id="facilityUsernameInput" required minlength="3" maxlength="50" pattern="[A-Za-z0-9._-]+" autocomplete="off" placeholder="petugas.rs.nama" /></label>
-              <label>Password awal<input id="facilityPasswordInput" type="password" required minlength="10" maxlength="128" autocomplete="new-password" placeholder="Minimal 10 karakter" /></label>
-              <label>Cari klaim<input id="facilityClaimSearch" type="search" placeholder="Cari ID klaim, misalnya CLM-03576" /></label>
-              <label>Klaim untuk faskes ini<select id="facilityClaimPicker" multiple size="7" required aria-describedby="facilityClaimHelp"></select></label>
-              <p class="field-help" id="facilityClaimHelp">Pilih satu atau lebih klaim. Klaim yang sudah terhubung ke faskes lain akan dipindahkan ke faskes ini.</p>
-              <p class="facility-form-result" id="facilityFormResult" aria-live="polite"></p>
-              <button class="button button-primary" id="createFacilityButton" type="submit">Daftarkan Faskes</button>
-            </form>
-            <section class="work-section facility-list-section"><div class="section-heading compact-heading"><div><h2>Faskes terdaftar</h2><p id="facilityCountLabel">Memuat data...</p></div></div><div class="table-frame"><div class="table-scroll"><table class="claims-table"><thead><tr><th>Faskes</th><th>Kode</th><th>Akun Petugas</th><th>Jumlah Klaim</th></tr></thead><tbody id="facilityListBody"><tr><td colspan="4" class="table-message">Memuat faskes...</td></tr></tbody></table></div></div></section>
-          </section>
-        </main>
-
-        <main class="workspace tab-panel hidden" id="disputesTab">
-          <section class="page-heading">
-            <div>
-              <p class="eyebrow">TINDAK LANJUT KLAIM</p>
-              <h2>Permintaan Klarifikasi Klaim</h2>
-              <p class="page-subtitle">Admin Verifikator meninjau klaim, menyusun klarifikasi, lalu menindaklanjuti respons rumah sakit.</p>
-            </div>
-            <div class="dispute-page-actions">
-              <button class="button button-primary" id="openDisputeModalButton" type="button">Susun Permintaan Klarifikasi</button>
-              <button class="button button-quiet" id="refreshDisputesButton" type="button">↻ Perbarui</button>
-            </div>
-          </section>
-          <section class="dispute-summary-grid" aria-label="Ringkasan status klarifikasi">
-            <article><span>Total klarifikasi</span><strong id="disputeCountTotal">—</strong></article><article><span>Perlu pemeriksaan akhir</span><strong id="disputeCountInReview">—</strong></article><article class="is-alert"><span>Perlu ditinjau ≥ 48 jam</span><strong id="disputeCountOverdue">—</strong></article><article><span>Perlu revisi</span><strong id="disputeCountRevision">—</strong></article><article><span>Disetujui</span><strong id="disputeCountApproved">—</strong></article><article><span>Terkirim</span><strong id="disputeCountSent">—</strong></article><article><span>Menunggu Respons RS</span><strong id="disputeCountWaitingRs">0</strong></article><article><span>Menunggu Penilaian Ulang</span><strong id="disputeCountWaitingReassessment">0</strong></article><article class="is-alert"><span>Klarifikasi Terlambat (&gt;48 jam)</span><strong id="disputeCountLateRs">0</strong></article>
-          </section>
-          <section class="dispute-layout">
-            <div class="work-section dispute-list-panel">
-              <div class="section-heading compact-heading dispute-table-toolbar">
-                <div>
-                  <h2>Klarifikasi tersimpan</h2>
-                  <p id="disputeListSummary">Memuat data…</p>
-                </div>
-                <div class="dispute-table-filters">
-                  <div class="dispute-search">
-                    <label class="sr-only" for="disputeSearchInput">Cari klarifikasi</label>
-                    <input id="disputeSearchInput" type="search" placeholder="Cari ID / klaim…" autocomplete="off" />
-                  </div>
-                  <label class="sr-only" for="disputeStatusFilter">Filter status klarifikasi</label>
-                  <select id="disputeStatusFilter"><option value="">Semua status</option><option value="draft">Draf</option><option value="in_review">Perlu pemeriksaan akhir</option><option value="approved">Disetujui</option><option value="needs_revision">Perlu revisi</option><option value="sent">Terkirim</option><option value="closed">Ditutup</option><option value="cancelled">Dihapus</option></select>
-                </div>
-              </div>
-              <div class="table-frame">
-                <div class="table-scroll">
-                  <table class="claims-table dispute-table">
-                    <thead>
-                      <tr>
-                        <th scope="col">ID Klarifikasi</th>
-                        <th scope="col">Klaim</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Pembaruan</th>
-                        <th scope="col" class="action-column">Aksi</th>
-                        <th scope="col" class="delete-column">Hapus</th>
-                      </tr>
-                    </thead>
-                    <tbody id="disputeListBody"><tr><td colspan="6" class="table-message">Memuat klarifikasi…</td></tr></tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- Dispute Detail Popup Modal -->
-          <div class="dispute-detail-overlay hidden" id="disputeDetailOverlay">
-            <div class="dispute-detail-backdrop" id="disputeDetailBackdrop"></div>
-            <div class="work-section dispute-detail-panel" id="disputeDetailPanel" role="dialog" aria-modal="true" aria-labelledby="disputeDetailTitle">
-              <div class="dispute-detail-modal-header">
-                <div>
-                  <p class="eyebrow" id="disputeDetailId"></p>
-                  <h2 id="disputeDetailTitle">Klaim</h2>
-                  <p id="disputeDetailMeta"></p>
-                </div>
-                <div class="dispute-detail-header-actions">
-                  <button class="button button-quiet" id="exportDisputePdfButton" type="button">Export PDF</button>
-                  <button class="icon-button" id="closeDisputeDetailButton" type="button" aria-label="Tutup detail">×</button>
-                </div>
-              </div>
-              <div id="disputeDetailContent" class="dispute-detail-body">
-                <div class="rs-stepper" id="bpjsClarificationStepper" aria-label="Tahapan klarifikasi"></div>
-                <p class="feedback-result" id="disputeReviewNote"></p>
-                <label class="form-field" for="disputeLetterBody">Isi surat permintaan klarifikasi</label><textarea id="disputeLetterBody" class="dispute-letter-editor" rows="14"></textarea>
-                <section class="dispute-versions"><h3>Riwayat versi surat</h3><div id="disputeVersionList"></div></section>
-                <section class="dispute-citations"><h3>Dasar regulasi dan kutipan</h3><ul id="disputeCitationList"></ul></section>
-                <section class="dispute-citations dispute-hospital-thread"><h3>Thread klarifikasi rumah sakit</h3><div id="disputeHospitalThread"><p>Belum ada respons dari rumah sakit.</p></div></section>
-                <section class="dispute-review-box hidden" id="disputeReevaluation"><h3>Penilaian ulang respons RS</h3><label class="form-field" for="disputeReevaluationNotes">Catatan verifikator</label><textarea id="disputeReevaluationNotes" rows="3" placeholder="Catatan penilaian atau alasan tindak lanjut"></textarea><div class="dispute-actions"><button class="button button-quiet" id="requestAdditionalClarificationButton" type="button">Minta klarifikasi tambahan</button><button class="button button-primary" id="acceptHospitalResponseButton" type="button">Terima penjelasan</button></div></section>
-                <section class="dispute-comments"><h3>Diskusi dan catatan klarifikasi</h3><ol id="disputeCommentList"></ol><label class="form-field" for="disputeCommentInput">Tambah komentar</label><textarea id="disputeCommentInput" rows="3" maxlength="4000" placeholder="Catatan untuk Admin Verifikator"></textarea><button class="button button-quiet" id="addDisputeCommentButton" type="button">Kirim komentar</button></section>
-                <div class="dispute-actions" id="disputeBpjsActions"><button class="button button-quiet" id="saveDisputeButton" type="button">Simpan perubahan</button><button class="button button-primary" id="submitDisputeButton" type="button">Ajukan persetujuan</button></div>
-                <div class="dispute-sent-form hidden" id="disputeSentForm">
-                  <p class="dispute-sent-label">Catat pengiriman manual jika diperlukan untuk data lama:</p>
-                  <div class="dispute-sent-fields">
-                    <label class="form-field" for="disputeRecipient">Faskes penerima</label>
-                    <input id="disputeRecipient" type="text" placeholder="Nama rumah sakit" aria-label="Faskes penerima" />
-                    <label class="form-field" for="disputeReference">Nomor Referensi / Bukti Pengiriman</label>
-                    <input id="disputeReference" type="text" placeholder="Contoh: REF-2024/BPJS/03576 atau No. Resi Surat" aria-label="Nomor referensi" />
-                  </div>
-                  <div class="dispute-actions">
-                    <button class="button button-primary" id="markDisputeSentButton" type="button">Catat sudah dikirim</button>
-                  </div>
-                </div>
-                <div class="dispute-review-box hidden" id="disputeVerifierActions"><label class="form-field" for="disputeReviewNotes">Catatan Admin Verifikator</label><textarea id="disputeReviewNotes" rows="3" placeholder="Catatan persetujuan atau revisi"></textarea><div class="dispute-actions"><button class="button button-quiet" id="requestDisputeRevisionButton" type="button">Minta revisi</button><button class="button button-primary" id="approveDisputeButton" type="button">Setujui &amp; Kirim ke RS</button></div></div>
-                <section class="dispute-history"><h3>Riwayat</h3><ol id="disputeHistoryList"></ol></section>
-              </div>
+              <div id="manualResult" class="manual-result hidden" aria-live="polite"></div>
             </div>
           </div>
-        </main>
+        </section>
 
-        <main class="workspace tab-panel hidden" id="reportsTab">
-          <section class="page-heading">
+        <section class="claims-section" aria-labelledby="claimsTitle">
+          <div class="section-heading">
             <div>
-              <p class="eyebrow">RINGKASAN EKSEKUTIF &amp; AUDIT INTELLIGENCE</p>
-              <h2>Dashboard Analitik &amp; Intelijen Medis</h2>
-              <p class="page-subtitle">Analisis mendalam 5.500 klaim FKRTL: deteksi fraud/anomali, disparitas tarif, korelasi lama rawat, dan penyelamatan dana JKN.</p>
+              <div class="section-title-line">
+                <h2 id="claimsTitle">Daftar Klaim</h2>
+                <span class="live-label"><span></span> DATA LIVE</span>
+              </div>
+              <p id="resultSummary">Menyiapkan data audit</p>
             </div>
-            <div class="analytics-heading-actions">
-              <button class="button button-quiet" id="refreshAnalyticsBtn" type="button">↻ Segarkan Analitik</button>
-              <button class="button button-primary" id="exportPdfBtn" type="button">↓ Export PDF</button>
+            <div class="section-actions">
+              <button class="button button-quiet" id="refreshButton" type="button">
+                <span aria-hidden="true">↻</span> Perbarui
+              </button>
+              <button class="button button-primary" id="batchAuditBtn" type="button">
+                <span class="button-icon" aria-hidden="true">◈</span>
+                <span class="button-label">Audit 100 Klaim</span>
+              </button>
             </div>
-          </section>
+          </div>
 
-          <!-- 4 Executive KPI Cards -->
-          <section class="analytics-kpis-grid" aria-label="Ringkasan Eksekutif Analitik">
-            <article class="analytics-kpi-card" style="--kpi-accent: #0284c7;">
-              <div class="analytics-kpi-header">
-                <span class="analytics-kpi-title">Total Paparan Tagihan</span>
-                <span class="analytics-kpi-pill">5.500 Klaim</span>
-              </div>
-              <div class="analytics-kpi-value" id="analyticsTotalCharge">Rp 47,24 M</div>
-              <div class="analytics-kpi-sub">Total akumulasi biaya diaudit FKRTL</div>
-            </article>
-
-            <article class="analytics-kpi-card" style="--kpi-accent: #10b981;">
-              <div class="analytics-kpi-header">
-                <span class="analytics-kpi-title">Potensi Hemat Dana JKN</span>
-                <span class="analytics-kpi-pill" style="color: #059669; background: #ecfdf5;">44,7% Tagihan</span>
-              </div>
-              <div class="analytics-kpi-value" id="analyticsTotalSaving" style="color: #059669;">Rp 21,13 M</div>
-              <div class="analytics-kpi-sub">Efisiensi dari 1.925 klaim anomali</div>
-            </article>
-
-            <article class="analytics-kpi-card" style="--kpi-accent: #ef4444;">
-              <div class="analytics-kpi-header">
-                <span class="analytics-kpi-title">Tingkat Anomali Klinis</span>
-                <span class="analytics-kpi-pill" style="color: #dc2626; background: #fef2f2;">Flagged AI</span>
-              </div>
-              <div class="analytics-kpi-value" id="analyticsAnomalyRate">35,0%</div>
-              <div class="analytics-kpi-sub" id="analyticsAnomalyBreakdown">1.100 Upcoding · 825 Unbundling</div>
-            </article>
-
-            <article class="analytics-kpi-card" style="--kpi-accent: #f59e0b;">
-              <div class="analytics-kpi-header">
-                <span class="analytics-kpi-title">Disparitas Tagihan Anomali</span>
-                <span class="analytics-kpi-pill">Rasio 2,9x</span>
-              </div>
-              <div class="analytics-kpi-value" id="analyticsCostDisparity">Rp 14,96 Jt</div>
-              <div class="analytics-kpi-sub">Rata-rata klaim anomali vs Rp 5,16 Jt (aman)</div>
-            </article>
-          </section>
-
-          <!-- Interactive Filter & Segment Bar -->
-          <section class="analytics-filter-bar" aria-label="Filter analitik klaim">
-            <div class="analytics-filters-left">
-              <label for="analyticsCategoryFilter" class="sr-only">Filter Kategori</label>
-              <select id="analyticsCategoryFilter" class="analytics-filter-select">
-                <option value="all">Semua Kategori (5.500 Klaim)</option>
-                <option value="upcoding">Upcoding Saja (1.100 Klaim)</option>
-                <option value="unbundling">Unbundling Saja (825 Klaim)</option>
-                <option value="safe">Klaim Aman Saja (3.575 Klaim)</option>
-              </select>
-
-              <label for="analyticsCostFilter" class="sr-only">Filter Rentang Tagihan</label>
-              <select id="analyticsCostFilter" class="analytics-filter-select">
-                <option value="all">Semua Nilai Tagihan</option>
-                <option value="low">&lt; Rp 5 Juta (Rawat Jalan / Ringan)</option>
-                <option value="medium">Rp 5 - 10 Juta (Rawat Sedang)</option>
-                <option value="high">Rp 10 - 15 Juta (Risiko Tinggi)</option>
-                <option value="critical">&gt; Rp 15 Juta (Risiko Ekstrem)</option>
-              </select>
-
-              <div class="analytics-chip-group" role="group" aria-label="Preset Cepat">
-                <button type="button" class="analytics-chip is-active" data-analytics-preset="all">Semua</button>
-                <button type="button" class="analytics-chip" data-analytics-preset="upcoding">Upcoding</button>
-                <button type="button" class="analytics-chip" data-analytics-preset="unbundling">Unbundling</button>
-                <button type="button" class="analytics-chip" data-analytics-preset="high_risk">&gt; Rp 10 Jt</button>
-              </div>
+          <div class="filter-bar">
+            <label class="search-field" for="claimSearch"><span aria-hidden="true">⌕</span><input id="claimSearch"
+                type="search" placeholder="Cari ID klaim, SEP, atau catatan klinis…" autocomplete="off" /></label>
+            <label class="filter-control" for="statusFilter"><span>Status</span><select id="statusFilter">
+                <option value="">Semua Status</option>
+                <option value="fraud">Anomali / Flagged</option>
+                <option value="safe">Aman / Safe</option>
+              </select></label>
+            <label class="filter-control" for="categoryFilter"><span>Kategori</span><select id="categoryFilter">
+                <option value="">Semua kategori</option>
+                <option value="upcoding">Upcoding</option>
+                <option value="unbundling">Unbundling</option>
+              </select></label>
+            <label class="filter-control page-size-control" for="pageSize"><span>Baris</span><select id="pageSize">
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select></label>
+          </div>
+          <div class="table-frame">
+            <div class="table-scroll" id="tableScroll">
+              <table id="resultsTable" class="claims-table results-table-new">
+                <thead>
+                  <tr>
+                    <th scope="col">No</th>
+                    <th scope="col">ID Klaim / SEP</th>
+                    <th scope="col">Catatan Dokter</th>
+                    <th scope="col">Tindakan (ICD)</th>
+                    <th scope="col">Total Biaya</th>
+                    <th scope="col">Status</th>
+                    <th scope="col" class="action-column">DETAIL</th>
+                  </tr>
+                </thead>
+                <tbody id="claimsTableBody">
+                  <tr>
+                    <td colspan="7" class="table-message">Memuat klaim…</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            <div id="analyticsFilterStatus" style="font-size: 11px; color: var(--text-secondary); font-weight: 600;">
-              Menampilkan data menyeluruh
-            </div>
-          </section>
+            <div id="paginationContainer" class="pagination-container"></div>
+          </div>
+        </section>
+      </main>
 
-          <!-- 4 Rich Analytics Charts -->
-          <section class="analytics-charts-grid" aria-label="Visualisasi data analitik">
-            <!-- Chart 1: Financial Comparison -->
-            <article class="analytics-chart-card">
-              <div class="analytics-chart-header">
-                <div>
-                  <h3>Komparasi Finansial per Kategori Klaim</h3>
-                  <p class="analytics-chart-subtitle">Total Tagihan RS vs Tarif Disetujui INA-CBG vs Potensi Penghematan</p>
-                </div>
-                <span class="analytics-chart-badge">Finansial JKN</span>
-              </div>
-              <div class="chart-container-large">
-                <canvas id="financialComparisonChart" aria-label="Grafik komparasi finansial klaim"></canvas>
-              </div>
-            </article>
-
-            <!-- Chart 2: LOS Correlation -->
-            <article class="analytics-chart-card">
-              <div class="analytics-chart-header">
-                <div>
-                  <h3>Korelasi Lama Rawat (LOS) vs Tingkat Anomali</h3>
-                  <p class="analytics-chart-subtitle">Volume Klaim (Batang) vs % Anomali &amp; Rata-rata Biaya (Garis)</p>
-                </div>
-                <span class="analytics-chart-badge">Klinis &amp; LOS</span>
-              </div>
-              <div class="chart-container-large">
-                <canvas id="losCorrelationChart" aria-label="Grafik korelasi lama rawat dan anomali"></canvas>
-              </div>
-            </article>
-
-            <!-- Chart 3: Cost Range & Risk Concentration -->
-            <article class="analytics-chart-card">
-              <div class="analytics-chart-header">
-                <div>
-                  <h3>Distribusi Rentang Tagihan &amp; Tingkat Risiko</h3>
-                  <p class="analytics-chart-subtitle">Proporsi klaim berdasarkan klaster biaya dan tingkat anomali</p>
-                </div>
-                <span class="analytics-chart-badge">Segmentasi Risiko</span>
-              </div>
-              <div class="chart-container-large">
-                <canvas id="costRiskDistChart" aria-label="Grafik distribusi sebaran tagihan"></canvas>
-              </div>
-            </article>
-
-            <!-- Chart 4: Top Violations -->
-            <article class="analytics-chart-card">
-              <div class="analytics-chart-header">
-                <div>
-                  <h3>Top 8 Pola Anomali ICD-10 &amp; Tindakan Terbanyak</h3>
-                  <p class="analytics-chart-subtitle">Kombinasi diagnosis &amp; tindakan dengan akumulasi potensi kebocoran terbesar</p>
-                </div>
-                <span class="analytics-chart-badge">Top Kebocoran</span>
-              </div>
-              <div class="chart-container-large">
-                <canvas id="topAnomaliesChart" aria-label="Grafik top anomali klaim"></canvas>
-              </div>
-            </article>
-          </section>
-
-          <!-- 3 Strategic Clinical Insights Cards -->
-          <section class="clinical-insights-section" aria-label="Temuan dan Intelijen Klinis Utama">
-            <div class="section-heading compact-heading" style="margin-bottom: 12px;">
+      <main class="workspace tab-panel hidden" id="batchTab">
+        <section class="page-heading">
+          <div>
+            <p class="eyebrow">PEMROSESAN TERKENDALI</p>
+            <h2>Batch Analysis</h2>
+            <p class="page-subtitle">Jalankan pemeriksaan pada dataset klaim aktif.</p>
+          </div>
+        </section>
+        <section class="batch-layout" aria-label="Pengaturan dan parameter batch">
+          <div class="work-section batch-work-section">
+            <div class="section-heading compact-heading">
               <div>
-                <h2 style="font-size: 16px;">Temuan Strategis &amp; Intelijen Klinis</h2>
-                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Wawasan utama dari algoritma deteksi pola fraud untuk verifikator medis BPJS</p>
+                <h2>Simulasi Batch</h2>
+                <p>Pilih volume klaim untuk menjalankan penapisan.</p>
               </div>
             </div>
-            <div class="clinical-insights-grid">
-              <article class="clinical-insight-card" style="--insight-accent: #ef4444;">
-                <span class="clinical-insight-icon" aria-hidden="true">⚠️</span>
-                <h4>Konsentrasi Anomali Tagihan &gt; Rp 10 Jt</h4>
-                <p>100% dari 1.612 klaim dengan tagihan di atas Rp 10 juta terindikasi anomali klinis. Kategori ini menyumbang Rp 19,60 Miliar (92,7%) dari total seluruh potensi kebocoran dana JKN.</p>
-                <div class="clinical-insight-stat">
-                  <span>Pangsa Kebocoran:</span>
-                  <strong style="color: #ef4444;">92,7% Dana Terindikasi</strong>
-                </div>
-              </article>
-
-              <article class="clinical-insight-card" style="--insight-accent: #f59e0b;">
-                <span class="clinical-insight-icon" aria-hidden="true">📈</span>
-                <h4>Lonjakan Anomali pada LOS 9-14 Hari</h4>
-                <p>Pasien dengan lama rawat inap &ge; 9 hari mengalami lonjakan biaya tagihan hampir 2x lipat (rata-rata Rp 15,2 Juta vs Rp 7,8 Juta) yang didorong oleh penambahan diagnosis sekunder berat (Upcoding).</p>
-                <div class="clinical-insight-stat">
-                  <span>Tingkat Anomali LOS &ge; 9:</span>
-                  <strong style="color: #f59e0b;">100% Flagged</strong>
-                </div>
-              </article>
-
-              <article class="clinical-insight-card" style="--insight-accent: #10b981;">
-                <span class="clinical-insight-icon" aria-hidden="true">🛡️</span>
-                <h4>Pola Unbundling Bedah &amp; Dialisis</h4>
-                <p>Pelanggaran aturan penagihan terpisah paling dominan ditemukan pada tindakan bedah (apendektomi + laparatomi) dan hemodialisis + injeksi tambahan dengan potensi penyelamatan Rp 9,14 Miliar.</p>
-                <div class="clinical-insight-stat">
-                  <span>Penyelamatan Unbundling:</span>
-                  <strong style="color: #10b981;">Rp 9,14 Miliar</strong>
-                </div>
-              </article>
+            <div class="batch-size-chips" role="group" aria-label="Pilih ukuran batch">
+              <button class="batch-size-chip is-active" type="button" data-batch-size="100">100 Klaim</button>
+              <button class="batch-size-chip" type="button" data-batch-size="500">500 Klaim</button>
+              <button class="batch-size-chip" type="button" data-batch-size="1000">1.000 Klaim</button>
+              <button class="batch-size-chip" type="button" data-batch-size="5000">5.000 Klaim</button>
             </div>
-          </section>
-
-          <!-- Top High Impact Claims Table -->
-          <section class="high-impact-section" aria-label="Klaim dengan dampak finansial tertinggi">
-            <div class="high-impact-header">
+            <form id="batchAuditForm" class="batch-form">
+              <label for="batchLimit">Jumlah klaim</label><input id="batchLimit" type="number" min="1" max="5500"
+                step="1" value="100" required />
+              <button class="button button-primary" type="submit" id="batchRunButton"><span class="button-icon"
+                  aria-hidden="true">◈</span><span class="button-label">Jalankan Batch</span></button>
+            </form>
+            <div class="batch-results hidden" id="batchResults" aria-live="polite"></div>
+            <div class="batch-summary hidden" id="batchSummary" aria-live="polite"></div>
+          </div>
+          <aside class="work-section model-performance" aria-labelledby="modelPerformanceTitle">
+            <h2 id="modelPerformanceTitle">Parameter &amp; Performa Model</h2>
+            <dl>
               <div>
-                <h3>Klaim Berdampak Finansial Tertinggi (Top High-Impact Outliers)</h3>
-                <p>Klaim dengan selisih tagihan dan potensi penghematan terbesar yang membutuhkan penelaahan segera.</p>
+                <dt>Throughput</dt>
+                <dd>~1.1 ms/klaim</dd>
               </div>
-              <span class="live-label"><span></span> REKOMENDASI AUDIT PRIORITAS</span>
+              <div>
+                <dt>Knowledge Base</dt>
+                <dd>6 Regulasi Kemenkes</dd>
+              </div>
+              <div>
+                <dt>Engine</dt>
+                <dd>Dual-Engine XGBoost + Rule Engine</dd>
+              </div>
+            </dl>
+          </aside>
+        </section>
+        <section class="batch-result-table-section hidden" id="batchResultTableSection"
+          aria-labelledby="batchResultsTitle">
+          <div class="section-heading">
+            <div>
+              <h2 id="batchResultsTitle">Hasil Pemeriksaan Batch</h2>
+              <p>Klaim yang dianalisis pada simulasi ini.</p>
+            </div>
+          </div>
+          <div class="table-frame">
+            <div class="table-scroll">
+              <table class="claims-table results-table-new">
+                <thead>
+                  <tr>
+                    <th>No</th>
+                    <th>ID Klaim / SEP</th>
+                    <th>Catatan Dokter</th>
+                    <th>Tindakan (ICD)</th>
+                    <th>Total Biaya</th>
+                    <th>Status</th>
+                    <th class="action-column">DETAIL</th>
+                  </tr>
+                </thead>
+                <tbody id="batchResultsTableBody">
+                  <tr>
+                    <td colspan="7" class="table-message">Hasil batch akan tampil di sini.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div id="batchResultsPaginationContainer" class="pagination-container"></div>
+          </div>
+        </section>
+      </main>
+
+      <main class="workspace tab-panel hidden" id="auditTab">
+        <section class="page-heading">
+          <div>
+            <p class="eyebrow">JEJAK VERIFIKASI</p>
+            <h2>Audit Trail</h2>
+            <p class="page-subtitle">Riwayat keputusan admin BPJS dan catatan verifikasi.</p>
+          </div><button class="button button-quiet" id="refreshAuditButton" type="button">↻ Perbarui</button>
+        </section>
+        <section class="work-section">
+          <div class="table-frame">
+            <div class="table-scroll">
+              <table class="claims-table">
+                <thead>
+                  <tr>
+                    <th>Waktu</th>
+                    <th>ID Klaim</th>
+                    <th>Admin</th>
+                    <th>Aksi</th>
+                    <th>Catatan</th>
+                  </tr>
+                </thead>
+                <tbody id="auditHistoryBody">
+                  <tr>
+                    <td colspan="5" class="table-message">Memuat riwayat…</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div id="auditPagination" class="pagination-container"></div>
+          </div>
+        </section>
+        <section class="work-section">
+          <div class="section-heading compact-heading">
+            <div>
+              <h2>Aktivitas Portal RS</h2>
+              <p>Aktivitas pengguna rumah sakit terkait klarifikasi dan dokumen.</p>
+            </div>
+          </div>
+          <div class="table-frame">
+            <div class="table-scroll">
+              <table class="claims-table">
+                <thead>
+                  <tr>
+                    <th>Waktu</th>
+                    <th>Petugas</th>
+                    <th>Faskes</th>
+                    <th>ID Klarifikasi</th>
+                    <th>Aksi</th>
+                    <th>Versi / Detail</th>
+                  </tr>
+                </thead>
+                <tbody id="hospitalActivityBody">
+                  <tr>
+                    <td colspan="6" class="table-message">Memuat aktivitas RS…</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div id="hospitalActivityPagination" class="pagination-container"></div>
+          </div>
+        </section>
+      </main>
+
+      <main class="workspace tab-panel hidden" id="facilitiesTab">
+        <section class="page-heading">
+          <div>
+            <p class="eyebrow">ADMIN BPJS</p>
+            <h2>Manajemen Faskes</h2>
+            <p class="page-subtitle">Daftarkan fasilitas kesehatan, buat akun petugas RS, dan alokasikan klaim.</p>
+          </div><button class="button button-quiet" id="refreshFacilitiesButton" type="button">Perbarui</button>
+        </section>
+        <section class="facility-management-grid">
+          <form class="work-section facility-create-form" id="facilityCreateForm">
+            <div class="section-heading compact-heading">
+              <div>
+                <h2>Daftarkan faskes</h2>
+                <p>Akun petugas dibuat untuk portal RS. Password disimpan dalam bentuk hash.</p>
+              </div>
+            </div>
+            <label>Nama resmi faskes<input id="facilityNameInput" required maxlength="160"
+                placeholder="Contoh: RS Sehat Sentosa" /></label>
+            <label>Kode faskes<input id="facilityCodeInput" required maxlength="30"
+                placeholder="Contoh: 0001R001" /></label>
+            <label>Alamat<textarea id="facilityAddressInput" maxlength="1000" rows="3"
+                placeholder="Alamat fasilitas kesehatan"></textarea></label>
+            <div class="facility-form-divider"><span>Akun petugas RS</span></div>
+            <label>Username<input id="facilityUsernameInput" required minlength="3" maxlength="50"
+                pattern="[A-Za-z0-9._-]+" autocomplete="off" placeholder="petugas.rs.nama" /></label>
+            <label>Password awal<input id="facilityPasswordInput" type="password" required minlength="10"
+                maxlength="128" autocomplete="new-password" placeholder="Minimal 10 karakter" /></label>
+            <label>Cari klaim<input id="facilityClaimSearch" type="search"
+                placeholder="Cari ID klaim, misalnya CLM-03576" /></label>
+            <label>Klaim untuk faskes ini<select id="facilityClaimPicker" multiple size="7" required
+                aria-describedby="facilityClaimHelp"></select></label>
+            <p class="field-help" id="facilityClaimHelp">Pilih satu atau lebih klaim. Klaim yang sudah terhubung ke
+              faskes lain akan dipindahkan ke faskes ini.</p>
+            <p class="facility-form-result" id="facilityFormResult" aria-live="polite"></p>
+            <button class="button button-primary" id="createFacilityButton" type="submit">Daftarkan Faskes</button>
+          </form>
+          <section class="work-section facility-list-section">
+            <div class="section-heading compact-heading">
+              <div>
+                <h2>Faskes terdaftar</h2>
+                <p id="facilityCountLabel">Memuat data...</p>
+              </div>
             </div>
             <div class="table-frame">
               <div class="table-scroll">
-                <table class="claims-table results-table-new">
+                <table class="claims-table">
                   <thead>
                     <tr>
-                      <th scope="col">ID Klaim / SEP</th>
-                      <th scope="col">Catatan Dokter</th>
-                      <th scope="col">Tindakan (ICD)</th>
-                      <th scope="col">Tagihan RS</th>
-                      <th scope="col">Tarif Disetujui</th>
-                      <th scope="col">Potensi Hemat</th>
-                      <th scope="col">Tipe Anomali</th>
-                      <th scope="col" class="action-column">AKSI</th>
+                      <th>Faskes</th>
+                      <th>Kode</th>
+                      <th>Akun Petugas</th>
+                      <th>Jumlah Klaim</th>
                     </tr>
                   </thead>
-                  <tbody id="highImpactTableBody">
-                    <tr><td colspan="8" class="table-message">Memuat klaim prioritas…</td></tr>
+                  <tbody id="facilityListBody">
+                    <tr>
+                      <td colspan="4" class="table-message">Memuat faskes...</td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
             </div>
           </section>
+        </section>
+      </main>
 
-          <!-- Regulatory & Methodology Context -->
-          <section class="report-grid report-context-grid" aria-label="Metode dan sumber regulasi">
-            <article class="report-panel report-method-panel">
-              <h3>Metode Penapisan Hybrid AI</h3>
-              <p class="report-method-intro">HybridFraudDetector menggabungkan Rule Engine deterministik, validasi klinis INA-CBG, dan XGBoost model dengan pengawasan verifikator medis.</p>
-              <ol class="report-method-list">
-                <li><strong>Rule Engine deterministik:</strong> mencocokkan kombinasi kode dengan aturan koding Permenkes terdaftar.</li>
-                <li><strong>Validasi klinis dan tarif:</strong> mendeteksi disparitas tagihan pada tagihan &gt; Rp 7,5 juta atau rasio tarif &ge; 1,5.</li>
-                <li><strong>XGBoost Risk Scorer:</strong> probabilitas risiko machine learning untuk menandai komorbiditas janggal.</li>
-              </ol>
-              <p class="report-context-meta" id="reportRuleCount">Memuat aturan terdaftar…</p>
-            </article>
-            <article class="report-panel report-source-panel">
-              <h3>Dasar Hukum &amp; Regulasi Kemenkes</h3>
-              <p class="report-context-meta" id="reportSourcesMeta">Memuat sumber regulasi…</p>
-              <ul class="report-source-list" id="reportSourcesList"><li>Memuat judul sumber…</li></ul>
-            </article>
-          </section>
-
-          <!-- Executive Summary Callout -->
-          <section class="report-summary" id="reportSummary"></section>
-        </main>
-
-        <main class="workspace tab-panel hidden assistant-workspace" id="assistantTab">
-          <section id="fullChatWindow" class="assistant-panel" aria-labelledby="chatTitle">
-            <header class="chat-header"><div class="chat-avatar" aria-hidden="true"><img src="assets/logo-icon.svg" alt="" /></div><div class="chat-heading"><h2 id="chatTitle">KlaimGuard Assistant</h2><p>Rujukan Permenkes dan INA-CBG</p></div><span id="ragStatus" class="rag-status">Memeriksa indeks regulasi</span></header>
-            <div class="chat-messages" id="chatMessages" aria-live="polite"><article class="chat-message chat-message-assistant"><p>Ajukan pertanyaan koding atau dasar regulasi klaim.</p></article></div>
-            <div class="chat-suggestions" role="group" aria-label="Pertanyaan cepat">
-              <button class="chat-suggestion" type="button" data-chat-prompt="Aturan koding Unbundling pada tindakan bedah">Aturan koding Unbundling pada tindakan bedah</button>
-              <button class="chat-suggestion" type="button" data-chat-prompt="Ringkasan potensi kebocoran dana hari ini">Ringkasan potensi kebocoran dana hari ini</button>
+      <main class="workspace tab-panel hidden" id="disputesTab">
+        <section class="page-heading">
+          <div>
+            <p class="eyebrow">TINDAK LANJUT KLAIM</p>
+            <h2>Permintaan Klarifikasi Klaim</h2>
+            <p class="page-subtitle">Admin Verifikator meninjau klaim, menyusun klarifikasi, lalu menindaklanjuti
+              respons rumah sakit.</p>
+          </div>
+          <div class="dispute-page-actions">
+            <button class="button button-primary" id="openDisputeModalButton" type="button">Susun Permintaan
+              Klarifikasi</button>
+            <button class="button button-quiet" id="refreshDisputesButton" type="button">↻ Perbarui</button>
+          </div>
+        </section>
+        <section class="dispute-summary-grid" aria-label="Ringkasan status klarifikasi">
+          <article><span>Total klarifikasi</span><strong id="disputeCountTotal">—</strong></article>
+          <article><span>Perlu pemeriksaan akhir</span><strong id="disputeCountInReview">—</strong></article>
+          <article class="is-alert"><span>Perlu ditinjau ≥ 48 jam</span><strong id="disputeCountOverdue">—</strong>
+          </article>
+          <article><span>Perlu revisi</span><strong id="disputeCountRevision">—</strong></article>
+          <article><span>Disetujui</span><strong id="disputeCountApproved">—</strong></article>
+          <article><span>Terkirim</span><strong id="disputeCountSent">—</strong></article>
+          <article><span>Menunggu Respons RS</span><strong id="disputeCountWaitingRs">0</strong></article>
+          <article><span>Menunggu Penilaian Ulang</span><strong id="disputeCountWaitingReassessment">0</strong>
+          </article>
+          <article class="is-alert"><span>Klarifikasi Terlambat (&gt;48 jam)</span><strong
+              id="disputeCountLateRs">0</strong></article>
+        </section>
+        <section class="dispute-layout">
+          <div class="work-section dispute-list-panel">
+            <div class="section-heading compact-heading dispute-table-toolbar">
+              <div>
+                <h2>Klarifikasi tersimpan</h2>
+                <p id="disputeListSummary">Memuat data…</p>
+              </div>
+              <div class="dispute-table-filters">
+                <div class="dispute-search">
+                  <label class="sr-only" for="disputeSearchInput">Cari klarifikasi</label>
+                  <input id="disputeSearchInput" type="search" placeholder="Cari ID / klaim…" autocomplete="off" />
+                </div>
+                <label class="sr-only" for="disputeStatusFilter">Filter status klarifikasi</label>
+                <select id="disputeStatusFilter">
+                  <option value="">Semua status</option>
+                  <option value="draft">Draf</option>
+                  <option value="in_review">Perlu pemeriksaan akhir</option>
+                  <option value="approved">Disetujui</option>
+                  <option value="needs_revision">Perlu revisi</option>
+                  <option value="sent">Terkirim</option>
+                  <option value="closed">Ditutup</option>
+                  <option value="cancelled">Dihapus</option>
+                </select>
+              </div>
             </div>
-            <form class="chat-input-row" id="chatQueryForm"><label class="sr-only" for="chatQuery">Pertanyaan regulasi</label><input id="chatQuery" name="query" type="text" placeholder="Tanyakan dasar koding…" required /><button class="send-button" type="submit" aria-label="Kirim pertanyaan"><span aria-hidden="true">↑</span></button></form>
-          </section>
-        </main>
+            <div class="table-frame">
+              <div class="table-scroll">
+                <table class="claims-table dispute-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">ID Klarifikasi</th>
+                      <th scope="col">Klaim</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Pembaruan</th>
+                      <th scope="col" class="action-column">Aksi</th>
+                      <th scope="col" class="delete-column">Hapus</th>
+                    </tr>
+                  </thead>
+                  <tbody id="disputeListBody">
+                    <tr>
+                      <td colspan="6" class="table-message">Memuat klarifikasi…</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
 
-        <main class="workspace tab-panel hidden rs-portal" id="rsPortalTab">
-          <section class="page-heading"><div><p class="eyebrow">PORTAL FASILITAS KESEHATAN</p><h2>Dashboard Klarifikasi Klaim</h2><p class="page-subtitle" id="rsFacilityName">Memuat profil faskes...</p></div><button class="button button-quiet" id="refreshRsPortalButton" type="button">↻ Perbarui data</button></section>
-          <section class="rs-portal-view" id="rsDashboardView"><section class="rs-stat-grid" aria-label="Ringkasan klarifikasi">
+        <!-- Dispute Detail Popup Modal -->
+        <div class="dispute-detail-overlay hidden" id="disputeDetailOverlay">
+          <div class="dispute-detail-backdrop" id="disputeDetailBackdrop"></div>
+          <div class="work-section dispute-detail-panel" id="disputeDetailPanel" role="dialog" aria-modal="true"
+            aria-labelledby="disputeDetailTitle">
+            <div class="dispute-detail-modal-header">
+              <div>
+                <p class="eyebrow" id="disputeDetailId"></p>
+                <h2 id="disputeDetailTitle">Klaim</h2>
+                <p id="disputeDetailMeta"></p>
+              </div>
+              <div class="dispute-detail-header-actions">
+                <button class="button button-quiet" id="exportDisputePdfButton" type="button">Export PDF</button>
+                <button class="icon-button" id="closeDisputeDetailButton" type="button"
+                  aria-label="Tutup detail">×</button>
+              </div>
+            </div>
+            <div id="disputeDetailContent" class="dispute-detail-body">
+              <div class="rs-stepper" id="bpjsClarificationStepper" aria-label="Tahapan klarifikasi"></div>
+              <p class="feedback-result" id="disputeReviewNote"></p>
+              <label class="form-field" for="disputeLetterBody">Isi surat permintaan klarifikasi</label><textarea
+                id="disputeLetterBody" class="dispute-letter-editor" rows="14"></textarea>
+              <section class="dispute-versions">
+                <h3>Riwayat versi surat</h3>
+                <div id="disputeVersionList"></div>
+              </section>
+              <section class="dispute-citations">
+                <h3>Dasar regulasi dan kutipan</h3>
+                <ul id="disputeCitationList"></ul>
+              </section>
+              <section class="dispute-citations dispute-hospital-thread">
+                <h3>Thread klarifikasi rumah sakit</h3>
+                <div id="disputeHospitalThread">
+                  <p>Belum ada respons dari rumah sakit.</p>
+                </div>
+              </section>
+              <section class="dispute-review-box hidden" id="disputeReevaluation">
+                <h3>Penilaian ulang respons RS</h3><label class="form-field" for="disputeReevaluationNotes">Catatan
+                  verifikator</label><textarea id="disputeReevaluationNotes" rows="3"
+                  placeholder="Catatan penilaian atau alasan tindak lanjut"></textarea>
+                <div class="dispute-actions"><button class="button button-quiet"
+                    id="requestAdditionalClarificationButton" type="button">Minta klarifikasi tambahan</button><button
+                    class="button button-primary" id="acceptHospitalResponseButton" type="button">Terima
+                    penjelasan</button></div>
+              </section>
+              <section class="dispute-comments">
+                <h3>Diskusi dan catatan klarifikasi</h3>
+                <ol id="disputeCommentList"></ol><label class="form-field" for="disputeCommentInput">Tambah
+                  komentar</label><textarea id="disputeCommentInput" rows="3" maxlength="4000"
+                  placeholder="Catatan untuk Admin Verifikator"></textarea><button class="button button-quiet"
+                  id="addDisputeCommentButton" type="button">Kirim komentar</button>
+              </section>
+              <div class="dispute-actions" id="disputeBpjsActions"><button class="button button-quiet"
+                  id="saveDisputeButton" type="button">Simpan perubahan</button><button class="button button-primary"
+                  id="submitDisputeButton" type="button">Ajukan persetujuan</button></div>
+              <div class="dispute-sent-form hidden" id="disputeSentForm">
+                <p class="dispute-sent-label">Catat pengiriman manual jika diperlukan untuk data lama:</p>
+                <div class="dispute-sent-fields">
+                  <label class="form-field" for="disputeRecipient">Faskes penerima</label>
+                  <input id="disputeRecipient" type="text" placeholder="Nama rumah sakit"
+                    aria-label="Faskes penerima" />
+                  <label class="form-field" for="disputeReference">Nomor Referensi / Bukti Pengiriman</label>
+                  <input id="disputeReference" type="text" placeholder="Contoh: REF-2024/BPJS/03576 atau No. Resi Surat"
+                    aria-label="Nomor referensi" />
+                </div>
+                <div class="dispute-actions">
+                  <button class="button button-primary" id="markDisputeSentButton" type="button">Catat sudah
+                    dikirim</button>
+                </div>
+              </div>
+              <div class="dispute-review-box hidden" id="disputeVerifierActions"><label class="form-field"
+                  for="disputeReviewNotes">Catatan Admin Verifikator</label><textarea id="disputeReviewNotes" rows="3"
+                  placeholder="Catatan persetujuan atau revisi"></textarea>
+                <div class="dispute-actions"><button class="button button-quiet" id="requestDisputeRevisionButton"
+                    type="button">Minta revisi</button><button class="button button-primary" id="approveDisputeButton"
+                    type="button">Setujui &amp; Kirim ke RS</button></div>
+              </div>
+              <section class="dispute-history">
+                <h3>Riwayat</h3>
+                <ol id="disputeHistoryList"></ol>
+              </section>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <main class="workspace tab-panel hidden" id="reportsTab">
+        <section class="page-heading">
+          <div>
+            <p class="eyebrow">RINGKASAN EKSEKUTIF &amp; AUDIT INTELLIGENCE</p>
+            <h2>Dashboard Analitik &amp; Intelijen Medis</h2>
+            <p class="page-subtitle">Analisis mendalam 5.500 klaim FKRTL: deteksi fraud/anomali, disparitas tarif,
+              korelasi lama rawat, dan penyelamatan dana JKN.</p>
+          </div>
+          <div class="analytics-heading-actions">
+            <button class="button button-quiet" id="refreshAnalyticsBtn" type="button">↻ Segarkan Analitik</button>
+            <button class="button button-primary" id="exportPdfBtn" type="button">↓ Export PDF</button>
+          </div>
+        </section>
+
+        <!-- 4 Executive KPI Cards -->
+        <section class="analytics-kpis-grid" aria-label="Ringkasan Eksekutif Analitik">
+          <article class="analytics-kpi-card" style="--kpi-accent: #0284c7;">
+            <div class="analytics-kpi-header">
+              <span class="analytics-kpi-title">Total Paparan Tagihan</span>
+              <span class="analytics-kpi-pill">5.500 Klaim</span>
+            </div>
+            <div class="analytics-kpi-value" id="analyticsTotalCharge">Rp 47,24 M</div>
+            <div class="analytics-kpi-sub">Total akumulasi biaya diaudit FKRTL</div>
+          </article>
+
+          <article class="analytics-kpi-card" style="--kpi-accent: #10b981;">
+            <div class="analytics-kpi-header">
+              <span class="analytics-kpi-title">Potensi Hemat Dana JKN</span>
+              <span class="analytics-kpi-pill" style="color: #059669; background: #ecfdf5;">44,7% Tagihan</span>
+            </div>
+            <div class="analytics-kpi-value" id="analyticsTotalSaving" style="color: #059669;">Rp 21,13 M</div>
+            <div class="analytics-kpi-sub">Efisiensi dari 1.925 klaim anomali</div>
+          </article>
+
+          <article class="analytics-kpi-card" style="--kpi-accent: #ef4444;">
+            <div class="analytics-kpi-header">
+              <span class="analytics-kpi-title">Tingkat Anomali Klinis</span>
+              <span class="analytics-kpi-pill" style="color: #dc2626; background: #fef2f2;">Flagged AI</span>
+            </div>
+            <div class="analytics-kpi-value" id="analyticsAnomalyRate">35,0%</div>
+            <div class="analytics-kpi-sub" id="analyticsAnomalyBreakdown">1.100 Upcoding · 825 Unbundling</div>
+          </article>
+
+          <article class="analytics-kpi-card" style="--kpi-accent: #f59e0b;">
+            <div class="analytics-kpi-header">
+              <span class="analytics-kpi-title">Disparitas Tagihan Anomali</span>
+              <span class="analytics-kpi-pill">Rasio 2,9x</span>
+            </div>
+            <div class="analytics-kpi-value" id="analyticsCostDisparity">Rp 14,96 Jt</div>
+            <div class="analytics-kpi-sub">Rata-rata klaim anomali vs Rp 5,16 Jt (aman)</div>
+          </article>
+        </section>
+
+        <!-- Interactive Filter & Segment Bar -->
+        <section class="analytics-filter-bar" aria-label="Filter analitik klaim">
+          <div class="analytics-filters-left">
+            <label for="analyticsCategoryFilter" class="sr-only">Filter Kategori</label>
+            <select id="analyticsCategoryFilter" class="analytics-filter-select">
+              <option value="all">Semua Kategori (5.500 Klaim)</option>
+              <option value="upcoding">Upcoding Saja (1.100 Klaim)</option>
+              <option value="unbundling">Unbundling Saja (825 Klaim)</option>
+              <option value="safe">Klaim Aman Saja (3.575 Klaim)</option>
+            </select>
+
+            <label for="analyticsCostFilter" class="sr-only">Filter Rentang Tagihan</label>
+            <select id="analyticsCostFilter" class="analytics-filter-select">
+              <option value="all">Semua Nilai Tagihan</option>
+              <option value="low">&lt; Rp 5 Juta (Rawat Jalan / Ringan)</option>
+              <option value="medium">Rp 5 - 10 Juta (Rawat Sedang)</option>
+              <option value="high">Rp 10 - 15 Juta (Risiko Tinggi)</option>
+              <option value="critical">&gt; Rp 15 Juta (Risiko Ekstrem)</option>
+            </select>
+
+            <div class="analytics-chip-group" role="group" aria-label="Preset Cepat">
+              <button type="button" class="analytics-chip is-active" data-analytics-preset="all">Semua</button>
+              <button type="button" class="analytics-chip" data-analytics-preset="upcoding">Upcoding</button>
+              <button type="button" class="analytics-chip" data-analytics-preset="unbundling">Unbundling</button>
+              <button type="button" class="analytics-chip" data-analytics-preset="high_risk">&gt; Rp 10 Jt</button>
+            </div>
+          </div>
+          <div id="analyticsFilterStatus" style="font-size: 11px; color: var(--text-secondary); font-weight: 600;">
+            Menampilkan data menyeluruh
+          </div>
+        </section>
+
+        <!-- 4 Rich Analytics Charts -->
+        <section class="analytics-charts-grid" aria-label="Visualisasi data analitik">
+          <!-- Chart 1: Financial Comparison -->
+          <article class="analytics-chart-card">
+            <div class="analytics-chart-header">
+              <div>
+                <h3>Komparasi Finansial per Kategori Klaim</h3>
+                <p class="analytics-chart-subtitle">Total Tagihan RS vs Tarif Disetujui INA-CBG vs Potensi Penghematan
+                </p>
+              </div>
+              <span class="analytics-chart-badge">Finansial JKN</span>
+            </div>
+            <div class="chart-container-large">
+              <canvas id="financialComparisonChart" aria-label="Grafik komparasi finansial klaim"></canvas>
+            </div>
+          </article>
+
+          <!-- Chart 2: LOS Correlation -->
+          <article class="analytics-chart-card">
+            <div class="analytics-chart-header">
+              <div>
+                <h3>Korelasi Lama Rawat (LOS) vs Tingkat Anomali</h3>
+                <p class="analytics-chart-subtitle">Volume Klaim (Batang) vs % Anomali &amp; Rata-rata Biaya (Garis)</p>
+              </div>
+              <span class="analytics-chart-badge">Klinis &amp; LOS</span>
+            </div>
+            <div class="chart-container-large">
+              <canvas id="losCorrelationChart" aria-label="Grafik korelasi lama rawat dan anomali"></canvas>
+            </div>
+          </article>
+
+          <!-- Chart 3: Cost Range & Risk Concentration -->
+          <article class="analytics-chart-card">
+            <div class="analytics-chart-header">
+              <div>
+                <h3>Distribusi Rentang Tagihan &amp; Tingkat Risiko</h3>
+                <p class="analytics-chart-subtitle">Proporsi klaim berdasarkan klaster biaya dan tingkat anomali</p>
+              </div>
+              <span class="analytics-chart-badge">Segmentasi Risiko</span>
+            </div>
+            <div class="chart-container-large">
+              <canvas id="costRiskDistChart" aria-label="Grafik distribusi sebaran tagihan"></canvas>
+            </div>
+          </article>
+
+          <!-- Chart 4: Top Violations -->
+          <article class="analytics-chart-card">
+            <div class="analytics-chart-header">
+              <div>
+                <h3>Top 8 Pola Anomali ICD-10 &amp; Tindakan Terbanyak</h3>
+                <p class="analytics-chart-subtitle">Kombinasi diagnosis &amp; tindakan dengan akumulasi potensi
+                  kebocoran terbesar</p>
+              </div>
+              <span class="analytics-chart-badge">Top Kebocoran</span>
+            </div>
+            <div class="chart-container-large">
+              <canvas id="topAnomaliesChart" aria-label="Grafik top anomali klaim"></canvas>
+            </div>
+          </article>
+        </section>
+
+        <!-- 3 Strategic Clinical Insights Cards -->
+        <section class="clinical-insights-section" aria-label="Temuan dan Intelijen Klinis Utama">
+          <div class="section-heading compact-heading" style="margin-bottom: 12px;">
+            <div>
+              <h2 style="font-size: 16px;">Temuan Strategis &amp; Intelijen Klinis</h2>
+              <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Wawasan utama dari algoritma
+                deteksi pola fraud untuk verifikator medis BPJS</p>
+            </div>
+          </div>
+          <div class="clinical-insights-grid">
+            <article class="clinical-insight-card" style="--insight-accent: #ef4444;">
+              <span class="clinical-insight-icon" aria-hidden="true">⚠️</span>
+              <h4>Konsentrasi Anomali Tagihan &gt; Rp 10 Jt</h4>
+              <p>100% dari 1.612 klaim dengan tagihan di atas Rp 10 juta terindikasi anomali klinis. Kategori ini
+                menyumbang Rp 19,60 Miliar (92,7%) dari total seluruh potensi kebocoran dana JKN.</p>
+              <div class="clinical-insight-stat">
+                <span>Pangsa Kebocoran:</span>
+                <strong style="color: #ef4444;">92,7% Dana Terindikasi</strong>
+              </div>
+            </article>
+
+            <article class="clinical-insight-card" style="--insight-accent: #f59e0b;">
+              <span class="clinical-insight-icon" aria-hidden="true">📈</span>
+              <h4>Lonjakan Anomali pada LOS 9-14 Hari</h4>
+              <p>Pasien dengan lama rawat inap &ge; 9 hari mengalami lonjakan biaya tagihan hampir 2x lipat (rata-rata
+                Rp 15,2 Juta vs Rp 7,8 Juta) yang didorong oleh penambahan diagnosis sekunder berat (Upcoding).</p>
+              <div class="clinical-insight-stat">
+                <span>Tingkat Anomali LOS &ge; 9:</span>
+                <strong style="color: #f59e0b;">100% Flagged</strong>
+              </div>
+            </article>
+
+            <article class="clinical-insight-card" style="--insight-accent: #10b981;">
+              <span class="clinical-insight-icon" aria-hidden="true">🛡️</span>
+              <h4>Pola Unbundling Bedah &amp; Dialisis</h4>
+              <p>Pelanggaran aturan penagihan terpisah paling dominan ditemukan pada tindakan bedah (apendektomi +
+                laparatomi) dan hemodialisis + injeksi tambahan dengan potensi penyelamatan Rp 9,14 Miliar.</p>
+              <div class="clinical-insight-stat">
+                <span>Penyelamatan Unbundling:</span>
+                <strong style="color: #10b981;">Rp 9,14 Miliar</strong>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- Top High Impact Claims Table -->
+        <section class="high-impact-section" aria-label="Klaim dengan dampak finansial tertinggi">
+          <div class="high-impact-header">
+            <div>
+              <h3>Klaim Berdampak Finansial Tertinggi (Top High-Impact Outliers)</h3>
+              <p>Klaim dengan selisih tagihan dan potensi penghematan terbesar yang membutuhkan penelaahan segera.</p>
+            </div>
+            <span class="live-label"><span></span> REKOMENDASI AUDIT PRIORITAS</span>
+          </div>
+          <div class="table-frame">
+            <div class="table-scroll">
+              <table class="claims-table results-table-new">
+                <thead>
+                  <tr>
+                    <th scope="col">ID Klaim / SEP</th>
+                    <th scope="col">Catatan Dokter</th>
+                    <th scope="col">Tindakan (ICD)</th>
+                    <th scope="col">Tagihan RS</th>
+                    <th scope="col">Tarif Disetujui</th>
+                    <th scope="col">Potensi Hemat</th>
+                    <th scope="col">Tipe Anomali</th>
+                    <th scope="col" class="action-column">AKSI</th>
+                  </tr>
+                </thead>
+                <tbody id="highImpactTableBody">
+                  <tr>
+                    <td colspan="8" class="table-message">Memuat klaim prioritas…</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Regulatory & Methodology Context -->
+        <section class="report-grid report-context-grid" aria-label="Metode dan sumber regulasi">
+          <article class="report-panel report-method-panel">
+            <h3>Metode Penapisan Hybrid AI</h3>
+            <p class="report-method-intro">HybridFraudDetector menggabungkan Rule Engine deterministik, validasi klinis
+              INA-CBG, dan XGBoost model dengan pengawasan verifikator medis.</p>
+            <ol class="report-method-list">
+              <li><strong>Rule Engine deterministik:</strong> mencocokkan kombinasi kode dengan aturan koding Permenkes
+                terdaftar.</li>
+              <li><strong>Validasi klinis dan tarif:</strong> mendeteksi disparitas tagihan pada tagihan &gt; Rp 7,5
+                juta atau rasio tarif &ge; 1,5.</li>
+              <li><strong>XGBoost Risk Scorer:</strong> probabilitas risiko machine learning untuk menandai komorbiditas
+                janggal.</li>
+            </ol>
+            <p class="report-context-meta" id="reportRuleCount">Memuat aturan terdaftar…</p>
+          </article>
+          <article class="report-panel report-source-panel">
+            <h3>Dasar Hukum &amp; Regulasi Kemenkes</h3>
+            <p class="report-context-meta" id="reportSourcesMeta">Memuat sumber regulasi…</p>
+            <ul class="report-source-list" id="reportSourcesList">
+              <li>Memuat judul sumber…</li>
+            </ul>
+          </article>
+        </section>
+
+        <!-- Executive Summary Callout -->
+        <section class="report-summary" id="reportSummary"></section>
+      </main>
+
+      <main class="workspace tab-panel hidden assistant-workspace" id="assistantTab">
+        <section id="fullChatWindow" class="assistant-panel" aria-labelledby="chatTitle">
+          <header class="chat-header">
+            <div class="chat-avatar" aria-hidden="true"><img src="assets/logo-icon.svg" alt="" /></div>
+            <div class="chat-heading">
+              <h2 id="chatTitle">KlaimGuard Assistant</h2>
+              <p>Rujukan Permenkes dan INA-CBG</p>
+            </div><span id="ragStatus" class="rag-status">Memeriksa indeks regulasi</span>
+          </header>
+          <div class="chat-messages" id="chatMessages" aria-live="polite">
+            <article class="chat-message chat-message-assistant">
+              <p>Ajukan pertanyaan koding atau dasar regulasi klaim.</p>
+            </article>
+          </div>
+          <div class="chat-suggestions" role="group" aria-label="Pertanyaan cepat">
+            <button class="chat-suggestion" type="button"
+              data-chat-prompt="Aturan koding Unbundling pada tindakan bedah">Aturan koding Unbundling pada tindakan
+              bedah</button>
+            <button class="chat-suggestion" type="button"
+              data-chat-prompt="Ringkasan potensi kebocoran dana hari ini">Ringkasan potensi kebocoran dana hari
+              ini</button>
+          </div>
+          <form class="chat-input-row" id="chatQueryForm"><label class="sr-only" for="chatQuery">Pertanyaan
+              regulasi</label><input id="chatQuery" name="query" type="text" placeholder="Tanyakan dasar koding…"
+              required /><button class="send-button" type="submit" aria-label="Kirim pertanyaan"><span
+                aria-hidden="true">↑</span></button></form>
+        </section>
+      </main>
+
+      <main class="workspace tab-panel hidden rs-portal" id="rsPortalTab">
+        <section class="page-heading">
+          <div>
+            <p class="eyebrow">PORTAL FASILITAS KESEHATAN</p>
+            <h2>Dashboard Klarifikasi Klaim</h2>
+            <p class="page-subtitle" id="rsFacilityName">Memuat profil faskes...</p>
+          </div><button class="button button-quiet" id="refreshRsPortalButton" type="button">↻ Perbarui data</button>
+        </section>
+        <section class="rs-portal-view" id="rsDashboardView">
+          <section class="rs-stat-grid" aria-label="Ringkasan klarifikasi">
             <article class="stat-card"><span>Perlu Respons</span><strong id="rsNeedsResponse">0</strong></article>
-            <article class="stat-card"><span>Menunggu Penilaian BPJS</span><strong id="rsWaitingReview">0</strong></article>
+            <article class="stat-card"><span>Menunggu Penilaian BPJS</span><strong id="rsWaitingReview">0</strong>
+            </article>
             <article class="stat-card"><span>Perlu Perbaikan</span><strong id="rsNeedsCorrection">0</strong></article>
             <article class="stat-card"><span>Selesai</span><strong id="rsCompleted">0</strong></article>
-            <article class="stat-card"><span>Mendekati Batas Waktu</span><strong id="rsApproachingDeadline">0</strong></article>
-          </section><section class="work-section"><div class="section-heading compact-heading"><div><h2>Permintaan Klarifikasi</h2><p>Semua klarifikasi untuk faskes ini, termasuk yang sudah selesai. Pilih item untuk melihat detail dan riwayat tindak lanjut.</p></div></div><div id="rsDashboardList" class="rs-clarification-list" aria-live="polite"></div><div id="rsDashboardPagination" class="pagination-container"></div></section></section>
-        </main>
-      </div>
+            <article class="stat-card"><span>Mendekati Batas Waktu</span><strong id="rsApproachingDeadline">0</strong>
+            </article>
+          </section>
+          <section class="work-section">
+            <div class="section-heading compact-heading">
+              <div>
+                <h2>Permintaan Klarifikasi</h2>
+                <p>Semua klarifikasi untuk faskes ini, termasuk yang sudah selesai. Pilih item untuk melihat detail dan
+                  riwayat tindak lanjut.</p>
+              </div>
+            </div>
+            <div id="rsDashboardList" class="rs-clarification-list" aria-live="polite"></div>
+            <div id="rsDashboardPagination" class="pagination-container"></div>
+          </section>
+        </section>
+      </main>
     </div>
+  </div>
 
-    <section class="rs-modal hidden" id="rsClarificationModal" aria-hidden="true">
-      <button class="rs-modal-backdrop" type="button" data-close-rs-clarification aria-label="Tutup detail klarifikasi"></button>
-      <div class="rs-modal-panel" role="dialog" aria-modal="true" aria-labelledby="rsClarificationModalTitle">
-        <header class="rs-modal-header"><div><p class="eyebrow">TINDAK LANJUT KLAIM</p><h2 id="rsClarificationModalTitle">Detail Klarifikasi</h2></div><button class="icon-button" type="button" data-close-rs-clarification aria-label="Tutup popup">×</button></header>
-        <div id="rsClarificationDetail" class="rs-modal-content"></div>
-      </div>
-    </section>
-    <section class="rs-modal hidden" id="rsProfileModal" aria-hidden="true">
-      <button class="rs-modal-backdrop" type="button" data-close-rs-profile aria-label="Tutup profil faskes"></button>
-      <div class="rs-modal-panel rs-profile-modal-panel" role="dialog" aria-modal="true" aria-labelledby="rsProfileModalTitle">
-        <header class="rs-modal-header"><div><p class="eyebrow">PORTAL FASILITAS KESEHATAN</p><h2 id="rsProfileModalTitle">Profil Faskes</h2></div><button class="icon-button" type="button" data-close-rs-profile aria-label="Tutup popup">×</button></header>
-        <div id="rsProfileDetails" class="rs-modal-content">Memuat profil faskes...</div>
-      </div>
-    </section>
+  <section class="rs-modal hidden" id="rsClarificationModal" aria-hidden="true">
+    <button class="rs-modal-backdrop" type="button" data-close-rs-clarification
+      aria-label="Tutup detail klarifikasi"></button>
+    <div class="rs-modal-panel" role="dialog" aria-modal="true" aria-labelledby="rsClarificationModalTitle">
+      <header class="rs-modal-header">
+        <div>
+          <p class="eyebrow">TINDAK LANJUT KLAIM</p>
+          <h2 id="rsClarificationModalTitle">Detail Klarifikasi</h2>
+        </div><button class="icon-button" type="button" data-close-rs-clarification aria-label="Tutup popup">×</button>
+      </header>
+      <div id="rsClarificationDetail" class="rs-modal-content"></div>
+    </div>
+  </section>
+  <section class="rs-modal hidden" id="rsProfileModal" aria-hidden="true">
+    <button class="rs-modal-backdrop" type="button" data-close-rs-profile aria-label="Tutup profil faskes"></button>
+    <div class="rs-modal-panel rs-profile-modal-panel" role="dialog" aria-modal="true"
+      aria-labelledby="rsProfileModalTitle">
+      <header class="rs-modal-header">
+        <div>
+          <p class="eyebrow">PORTAL FASILITAS KESEHATAN</p>
+          <h2 id="rsProfileModalTitle">Profil Faskes</h2>
+        </div><button class="icon-button" type="button" data-close-rs-profile aria-label="Tutup popup">×</button>
+      </header>
+      <div id="rsProfileDetails" class="rs-modal-content">Memuat profil faskes...</div>
+    </div>
+  </section>
 
-    <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+  <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
 
-    <section id="createDisputeModal" class="modal hidden" aria-hidden="true">
-      <div class="modal-backdrop" data-close-dispute-modal></div>
-      <div class="modal-panel dispute-create-modal" role="dialog" aria-modal="true" aria-labelledby="createDisputeModalTitle">
-        <header class="modal-header"><div><p class="eyebrow">TINDAK LANJUT KLAIM</p><h2 id="createDisputeModalTitle">Susun Permintaan Klarifikasi</h2></div><button class="icon-button" id="closeDisputeModalButton" type="button" aria-label="Tutup popup">×</button></header>
-        <form id="createDisputeForm" class="modal-content dispute-create-form">
-          <label class="form-field" for="newDisputeClaimId">ID klaim</label>
-          <div class="draft-form-row"><input id="newDisputeClaimId" name="claim_id" type="text" placeholder="CLM-03576" required /><button class="button button-primary" type="submit">Buat &amp; Simpan Draf</button></div>
-          <label class="form-field" for="newDisputeTemplate">Template surat</label><select id="newDisputeTemplate" name="template_code"><option value="formal">Formal</option><option value="ringkas">Ringkas</option><option value="rinci">Rinci dengan ringkasan klinis</option></select>
-          <p>Draf akan masuk ke antrean verifikasi Admin Verifikator sebelum dikirim ke faskes.</p>
-        </form>
-      </div>
-    </section>
+  <section id="createDisputeModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop" data-close-dispute-modal></div>
+    <div class="modal-panel dispute-create-modal" role="dialog" aria-modal="true"
+      aria-labelledby="createDisputeModalTitle">
+      <header class="modal-header">
+        <div>
+          <p class="eyebrow">TINDAK LANJUT KLAIM</p>
+          <h2 id="createDisputeModalTitle">Susun Permintaan Klarifikasi</h2>
+        </div><button class="icon-button" id="closeDisputeModalButton" type="button" aria-label="Tutup popup">×</button>
+      </header>
+      <form id="createDisputeForm" class="modal-content dispute-create-form">
+        <label class="form-field" for="newDisputeClaimId">ID klaim</label>
+        <div class="draft-form-row"><input id="newDisputeClaimId" name="claim_id" type="text" placeholder="CLM-03576"
+            required /><button class="button button-primary" type="submit">Buat &amp; Simpan Draf</button></div>
+        <label class="form-field" for="newDisputeTemplate">Template surat</label><select id="newDisputeTemplate"
+          name="template_code">
+          <option value="formal">Formal</option>
+          <option value="ringkas">Ringkas</option>
+          <option value="rinci">Rinci dengan ringkasan klinis</option>
+        </select>
+        <p>Draf akan masuk ke antrean verifikasi Admin Verifikator sebelum dikirim ke faskes.</p>
+      </form>
+    </div>
+  </section>
 
-    <section id="claimDetailDrawer" class="claim-drawer" aria-hidden="true">
-      <div class="drawer-backdrop" id="drawerBackdrop" data-close-modal></div>
-      <aside class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="auditModalTitle">
-        <header class="modal-header">
-          <div>
-            <p class="eyebrow">VERIFIKASI KLINIS</p>
-            <h2 id="auditModalTitle">Detail Pemeriksaan Klaim</h2>
-          </div>
-          <button class="icon-button" id="closeAuditModal" type="button" aria-label="Tutup detail">
-            <span aria-hidden="true">×</span>
-          </button>
-        </header>
-        <div class="modal-content" id="auditModalBody"></div>
-      </aside>
-    </section>
+  <section id="claimDetailDrawer" class="claim-drawer" aria-hidden="true">
+    <div class="drawer-backdrop" id="drawerBackdrop" data-close-modal></div>
+    <aside class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="auditModalTitle">
+      <header class="modal-header">
+        <div>
+          <p class="eyebrow">VERIFIKASI KLINIS</p>
+          <h2 id="auditModalTitle">Detail Pemeriksaan Klaim</h2>
+        </div>
+        <button class="icon-button" id="closeAuditModal" type="button" aria-label="Tutup detail">
+          <span aria-hidden="true">×</span>
+        </button>
+      </header>
+      <div class="modal-content" id="auditModalBody"></div>
+    </aside>
+  </section>
 
-    <section id="overrideModal" class="modal hidden" aria-hidden="true">
-      <div class="modal-backdrop" data-close-override></div>
-      <div class="modal-panel override-panel" role="dialog" aria-modal="true" aria-labelledby="overrideModalTitle">
-        <header class="modal-header"><div><p class="eyebrow">KEPUTUSAN VERIFIKATOR</p><h2 id="overrideModalTitle">Override Keputusan AI</h2></div><button class="icon-button" id="closeOverrideModal" type="button" aria-label="Tutup override">×</button></header>
-        <form class="modal-content" id="overrideForm">
-          <label class="form-field" for="overrideDecision">Keputusan akhir
-            <select id="overrideDecision" name="decision" required>
-              <option value="APPROVED_SAFE">Setujui sebagai aman</option>
-              <option value="CONFIRMED_FRAUD">Konfirmasi indikasi anomali</option>
-              <option value="DISPUTE_TO_RS">Minta klarifikasi rumah sakit</option>
-            </select>
-          </label>
-          <label class="form-field override-notes" for="overrideNotes">Alasan klinis <span>(minimal 10 karakter)</span>
-            <textarea id="overrideNotes" name="notes" minlength="10" required placeholder="Jelaskan pertimbangan klinis dan bukti pendukung…"></textarea>
-          </label>
-          <div class="feedback-footer"><p class="feedback-result" id="overrideResult" aria-live="polite"></p><div><button class="button button-quiet" id="cancelOverride" type="button">Batal</button> <button class="button button-primary" id="saveOverride" type="submit">Simpan Keputusan</button></div></div>
-        </form>
-      </div>
-    </section>
+  <section id="overrideModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop" data-close-override></div>
+    <div class="modal-panel override-panel" role="dialog" aria-modal="true" aria-labelledby="overrideModalTitle">
+      <header class="modal-header">
+        <div>
+          <p class="eyebrow">KEPUTUSAN VERIFIKATOR</p>
+          <h2 id="overrideModalTitle">Override Keputusan AI</h2>
+        </div><button class="icon-button" id="closeOverrideModal" type="button" aria-label="Tutup override">×</button>
+      </header>
+      <form class="modal-content" id="overrideForm">
+        <label class="form-field" for="overrideDecision">Keputusan akhir
+          <select id="overrideDecision" name="decision" required>
+            <option value="APPROVED_SAFE">Setujui sebagai aman</option>
+            <option value="CONFIRMED_FRAUD">Konfirmasi indikasi anomali</option>
+            <option value="DISPUTE_TO_RS">Minta klarifikasi rumah sakit</option>
+          </select>
+        </label>
+        <label class="form-field override-notes" for="overrideNotes">Alasan klinis <span>(minimal 10 karakter)</span>
+          <textarea id="overrideNotes" name="notes" minlength="10" required
+            placeholder="Jelaskan pertimbangan klinis dan bukti pendukung…"></textarea>
+        </label>
+        <div class="feedback-footer">
+          <p class="feedback-result" id="overrideResult" aria-live="polite"></p>
+          <div><button class="button button-quiet" id="cancelOverride" type="button">Batal</button> <button
+              class="button button-primary" id="saveOverride" type="submit">Simpan Keputusan</button></div>
+        </div>
+      </form>
+    </div>
+  </section>
 
-    <script type="module" src="js/main.js?v=enterprise-35"></script>
-  </body>
+  <script type="module" src="js/main.js?v=enterprise-35"></script>
+</body>
+
 </html>
