@@ -1,14 +1,19 @@
 # SQLite database files
 *.sqlite3
-backend/jkn_fraud.db
-backend/jkn_fraud.db-shm
-backend/jkn_fraud.db-wal
+*.db
+*.db-shm
+*.db-wal
+backend/jkn_fraud.db*
 
-# ChromaDB vector index
-backend/ml_models/vector_index/
+# ChromaDB vector index (binary files > 10MB)
+backend/ml_models/vector_index/*
+!backend/ml_models/vector_index/.gitkeep
 
 # File uploads
-backend/uploads/
+backend/uploads/*
+!backend/uploads/.gitkeep
+backend/uploads/rs_responses/*
+!backend/uploads/rs_responses/.gitkeep
 
 # Python cache
 __pycache__/
@@ -23,6 +28,13 @@ env/
 
 # ML model (generated at build time)
 backend/ml_models/*.pkl
+backend/ml_models/*.joblib
+!backend/ml_models/.gitkeep
+
+# Environment variables & secrets
+.env
+.env.*
+*.local
 
 # IDE
 .vscode/

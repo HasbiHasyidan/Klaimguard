@@ -1,0 +1,32 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# SQLite databases & journal files
+*.db
+*.db-shm
+*.db-wal
+*.sqlite3
+jkn_fraud.db*
+
+# Generated ML Models & artifacts (generated at build / init time)
+ml_models/*.pkl
+ml_models/*.joblib
+!ml_models/.gitkeep
+
+# ChromaDB Vector Store binary data (large files > 10MB)
+ml_models/vector_index/*
+!ml_models/vector_index/.gitkeep
+
+# File uploads (e.g. hospital clarification documents)
+uploads/*
+!uploads/.gitkeep
+uploads/rs_responses/*
+!uploads/rs_responses/.gitkeep
+
+# Environment variables & secrets
+.env
+.env.*
+*.local
+
