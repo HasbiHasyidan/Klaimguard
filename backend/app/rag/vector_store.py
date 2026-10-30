@@ -20,13 +20,13 @@ def _resolve_persist_dir(persist_dir: str) -> Path:
     return working_path if working_path.is_dir() else backend_path
 
 
-def _resolve_local_embedding_model() -> str:
+def _resolve_local_embedding_model() -> str | None:
+    # Hanya muat model jika sudah ada di cache lokal (local_files_only=True)
+    # agar tidak pernah memblokir / membuat server hang jika Hugging Face offline
     try:
-        return snapshot_download(DEFAULT_MODEL, local_files_only=False)
-    except Exception as exc:
-        raise RuntimeError(
-            f"Embedding model {DEFAULT_MODEL} must be cached locally before ingestion."
-        ) from exc
+        return snapshot_download(DEFAULT_MODEL, local_files_only=True)
+    except Exception:
+        return None
 
 
 class ChromaVectorManager:
@@ -38,39 +38,59 @@ class ChromaVectorManager:
         self.persist_directory = _resolve_persist_dir(persist_directory)
         self.persist_directory.mkdir(parents=True, exist_ok=True)
         self.collection_name = collection_name
-        self.embedding_function = SentenceTransformerEmbeddingFunction(
-            model_name=_resolve_local_embedding_model(),
-            device="cpu",
-            normalize_embeddings=True,
-        )
+        model_path = _resolve_local_embedding_model()
+        if model_path:
+            self.embedding_function = SentenceTransformerEmbeddingFunction(
+                model_name=model_path,
+                device="cpu",
+                normalize_embeddings=True,
+            )
+        else:
+            self.embedding_function = None
+
         self.client = chromadb.PersistentClient(
             path=str(self.persist_directory),
             settings=Settings(anonymized_telemetry=False),
         )
-        self.collection = self.client.get_or_create_collection(
-            name=collection_name,
-            embedding_function=self.embedding_function,
-            metadata={"hnsw:space": "cosine", "embedding_model": DEFAULT_MODEL},
-        )
+        if self.embedding_function:
+            self.collection = self.client.get_or_create_collection(
+                name=collection_name,
+                embedding_function=self.embedding_function,
+                metadata={"hnsw:space": "cosine", "embedding_model": DEFAULT_MODEL},
+            )
+        else:
+            self.collection = self.client.get_or_create_collection(
+                name=collection_name,
+                metadata={"hnsw:space": "cosine"},
+            )
 
     @property
     def count(self) -> int:
-        return self.collection.count()
+        try:
+            return self.collection.count()
+        except Exception:
+            return 0
 
     @property
     def indexed_documents(self) -> list[str]:
         names = set()
-        for offset in range(0, self.count, 1000):
-            result = self.collection.get(
-                limit=1000,
-                offset=offset,
-                include=["metadatas"],
-            )
-            names.update(
-                metadata["source_document"]
-                for metadata in result.get("metadatas") or []
-                if metadata and metadata.get("source_document")
-            )
+        total = self.count
+        if total == 0:
+            return []
+        for offset in range(0, total, 1000):
+            try:
+                result = self.collection.get(
+                    limit=1000,
+                    offset=offset,
+                    include=["metadatas"],
+                )
+                names.update(
+                    metadata["source_document"]
+                    for metadata in result.get("metadatas") or []
+                    if metadata and metadata.get("source_document")
+                )
+            except Exception:
+                break
         return sorted(names)
 
     def insert_chunks(self, chunks: list[dict[str, Any]], batch_size: int = 100) -> int:
@@ -118,7 +138,7 @@ class ChromaVectorManager:
         if top_k < 1:
             raise ValueError("top_k must be at least 1.")
         count = self.count
-        if not query_text.strip() or count == 0:
+        if not query_text.strip() or count == 0 or self.embedding_function is None:
             return []
         options: dict[str, Any] = {
             "query_texts": [query_text],
@@ -134,7 +154,10 @@ class ChromaVectorManager:
             options["where"] = filters[0]
         elif filters:
             options["where"] = {"$and": filters}
-        result = self.collection.query(**options)
+        try:
+            result = self.collection.query(**options)
+        except Exception:
+            return []
         ids = (result.get("ids") or [[]])[0]
         documents = (result.get("documents") or [[]])[0]
         metadatas = (result.get("metadatas") or [[]])[0]

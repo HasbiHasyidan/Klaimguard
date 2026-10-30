@@ -18,6 +18,9 @@ services:
       - KLAIMGUARD_AUTH_SECRET=klaimguard-enterprise-secret-key-healthkaton2026
       # Set "false" saat akses via http://IP-VPS, set "true" jika sudah ada domain HTTPS
       - KLAIMGUARD_COOKIE_SECURE=false
+      # Google Gemini AI Copilot (otomatis terbaca dari file .env di server)
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-3.5-flash-lite}
     volumes:
       # Data persisten SQLite, model XGBoost, ChromaDB, dan berkas upload rumah sakit
       - klaimguard-data:/data
