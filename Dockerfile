@@ -11,7 +11,9 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt ./requirements.txt
+# Install PyTorch versi CPU agar ukuran image hemat (180MB vs 2.5GB CUDA) & build cepat
 RUN python -m pip install --no-cache-dir --upgrade pip \
+    && python -m pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu \
     && python -m pip install --no-cache-dir -r requirements.txt
 
 COPY . .
@@ -23,7 +25,8 @@ RUN python -m backend.scripts.init_db \
 
 # Entrypoint script for container startup
 COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh \
+RUN sed -i 's/\r$//' /app/entrypoint.sh \
+    && chmod +x /app/entrypoint.sh \
     && chmod -R 777 /app
 
 EXPOSE 8000

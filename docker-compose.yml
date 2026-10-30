@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
     image: klaimguard-ai:latest
     ports:
-      # Port akses klaimguard
+      # Akses langsung via IP VPS (port 80 standar browser tanpa :8000)
       - "80:8000"
       # Port alternatif backend
       - "8000:8000"
@@ -14,9 +14,9 @@ services:
       - PORT=8000
       - PYTHONUNBUFFERED=1
       - PYTHONDONTWRITEBYTECODE=1
-      # Session cookie
+      # Session cookie secret
       - KLAIMGUARD_AUTH_SECRET=klaimguard-enterprise-secret-key-healthkaton2026
-      # Cookie secure
+      # Set "false" saat akses via http://IP-VPS, set "true" jika sudah ada domain HTTPS
       - KLAIMGUARD_COOKIE_SECURE=false
     volumes:
       # Data persisten SQLite, model XGBoost, ChromaDB, dan berkas upload rumah sakit
@@ -29,7 +29,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 25s
+      start_period: 60s
 
 volumes:
   klaimguard-data:
