@@ -17,11 +17,26 @@ GEMINI_MODEL_DEFAULT = "gemini-3.5-flash-lite"
 
 
 def query_gemini_assistant(query: str, claim_context: str = "") -> dict[str, Any] | None:
-    api_key = os.environ.get("GEMINI_API_KEY", "").strip()
+    api_key = os.environ.get("GEMINI_API_KEY", "").strip().strip('"').strip("'")
     if not api_key:
-        return None
+        print("[Gemini] GEMINI_API_KEY is empty in container!", flush=True)
+        return {
+            "answer_markdown": (
+                "## ⚠️ Kunci API Gemini Belum Ditemukan\n"
+                "Variabel `GEMINI_API_KEY` belum terdeteksi di dalam kontainer server.\n\n"
+                "**Langkah aktifkan di server VPS:**\n"
+                "1. Di console server ketik:\n"
+                "```bash\n"
+                "echo 'GEMINI_API_KEY=YOUR_GEMINI_API_KEY' > .env\n"
+                "echo 'GEMINI_MODEL=gemini-3.5-flash-lite' >> .env\n"
+                "sudo docker compose down && sudo docker compose up -d\n"
+                "```"
+            ),
+            "citations": [],
+            "drafted_dispute_letter": "Periksa konfigurasi GEMINI_API_KEY di server."
+        }
 
-    model = os.environ.get("GEMINI_MODEL", GEMINI_MODEL_DEFAULT).strip()
+    model = os.environ.get("GEMINI_MODEL", GEMINI_MODEL_DEFAULT).strip().strip('"').strip("'")
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
 
     system_instruction = (
@@ -71,7 +86,11 @@ def query_gemini_assistant(query: str, claim_context: str = "") -> dict[str, Any
             res_data = json.loads(response.read().decode("utf-8"))
             candidates = res_data.get("candidates") or []
             if not candidates:
-                return None
+                return {
+                    "answer_markdown": "## Respons AI Kosong\nGoogle Gemini tidak mengembalikan jawaban. Silakan coba kembali.",
+                    "citations": [],
+                    "drafted_dispute_letter": ""
+                }
             answer_text = candidates[0]["content"]["parts"][0]["text"]
 
             citations = [
@@ -93,9 +112,28 @@ def query_gemini_assistant(query: str, claim_context: str = "") -> dict[str, Any
                 "citations": citations,
                 "drafted_dispute_letter": letter,
             }
+    except urllib.error.HTTPError as exc:
+        err_msg = exc.read().decode("utf-8", errors="ignore")
+        print(f"[Gemini HTTPError] Code {exc.code}: {err_msg}", flush=True)
+        return {
+            "answer_markdown": (
+                f"## ⚠️ Kendala Akses Google Gemini API (HTTP {exc.code})\n"
+                f"Server Google mengembalikan respons berikut:\n```json\n{err_msg}\n```\n\n"
+                "Periksa apakah API Key valid dan kuota di Google AI Studio tersedia."
+            ),
+            "citations": [],
+            "drafted_dispute_letter": "Gagal terhubung ke AI API."
+        }
     except Exception as exc:
-        logger.warning("Gemini API request failed: %s", exc)
-        return None
+        print(f"[Gemini Exception] {exc}", flush=True)
+        return {
+            "answer_markdown": (
+                f"## ⚠️ Kendala Koneksi AI\n"
+                f"Terjadi kesalahan saat menghubungi Google Gemini API: `{exc}`"
+            ),
+            "citations": [],
+            "drafted_dispute_letter": "Gagal terhubung ke AI API."
+        }
 
 
 class RegulatoryCopilotService:

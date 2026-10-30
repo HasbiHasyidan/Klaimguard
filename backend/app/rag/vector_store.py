@@ -21,8 +21,6 @@ def _resolve_persist_dir(persist_dir: str) -> Path:
 
 
 def _resolve_local_embedding_model() -> str | None:
-    # Hanya muat model jika sudah ada di cache lokal (local_files_only=True)
-    # agar tidak pernah memblokir / membuat server hang jika Hugging Face offline
     try:
         return snapshot_download(DEFAULT_MODEL, local_files_only=True)
     except Exception:
