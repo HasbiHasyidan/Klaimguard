@@ -54,10 +54,10 @@ else
     echo "=== No persistent volume, using ephemeral storage ==="
 fi
 
-# Ingest regulations jika vector store belum tersedia
+# Ingest regulations jika vector store belum tersedia (dijalankan di background agar server web langsung aktif)
 if [ ! -f "backend/ml_models/vector_index/chroma.sqlite3" ] && [ ! -f "$DATA_DIR/vector_index/chroma.sqlite3" ]; then
-    echo "=== Vector index belum ada, memulai ekstraksi regulasi ke ChromaDB... ==="
-    python -m backend.scripts.ingest_regulations || echo "Warning: Ingest regulasi dilewati."
+    echo "=== Vector index belum ada, memulai ekstraksi regulasi di background... ==="
+    python -m backend.scripts.ingest_regulations > /tmp/ingest.log 2>&1 &
 fi
 
 echo "=== Starting KlaimGuard AI ==="
