@@ -220,3 +220,23 @@
   .chat-suggestions { padding-right: 12px; padding-left: 12px; }
   .chat-input-row { padding-right: 12px; padding-left: 12px; }
 }
+/* Dark Mode Elevation & Contrast for Assistant */
+body.dark-mode .chat-messages {
+  background: #141f19;
+}
+body.dark-mode .chat-message-assistant {
+  background: #1e2e26;
+  border: 1px solid #35463d;
+  color: #f1f5f9;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+body.dark-mode .chat-message-user {
+  background: #1c3b52;
+  border: 1px solid #2d5570;
+  color: #f8fafc;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+body.dark-mode .citation-card {
+  background: #192720;
+  border-color: #35463d;
+}

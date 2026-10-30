@@ -28,25 +28,74 @@ body {
 }
 
 .login-view {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
+  background: radial-gradient(ellipse at top, rgba(16, 185, 129, 0.08), transparent 70%),
+              radial-gradient(ellipse at bottom, rgba(37, 99, 235, 0.05), transparent 70%),
+              var(--bg-main);
+}
+
+.login-navbar {
+  width: 100%;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--sidebar-bg, #0C2B1D);
+  padding: 12px 32px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+[data-theme="dark"] .login-navbar {
+  background: var(--sidebar-bg, #0C2B1D);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.login-navbar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.login-header-logo {
+  height: 48px;
+  width: auto;
+  max-width: 220px;
+  object-fit: contain;
+  display: block;
+}
+
+.login-header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34d399;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.login-card-wrapper {
+  flex: 1;
+  display: grid;
   place-items: center;
-  padding: 24px;
-  background: radial-gradient(circle at top, #e8f5e9, var(--bg-main) 55%);
+  padding: 40px 20px;
 }
 
 .login-card {
-  width: min(100%, 430px);
-  padding: 38px;
+  width: min(100%, 440px);
+  padding: 40px;
   border: 1px solid var(--border-color);
-  border-radius: 16px;
+  border-radius: 20px;
   background: var(--card-bg);
-  box-shadow: var(--shadow-modal);
-}
-
-.login-logo {
-  width: 190px;
-  margin-bottom: 30px;
+  box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.08), 0 0 1px 1px var(--border-color);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .login-card h1 {
@@ -83,6 +132,7 @@ body {
 .password-toggle:hover { background: var(--bg-main); color: var(--text-primary); }
 .password-toggle:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 1px; }
 .password-toggle svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.password-toggle svg.is-hidden { display: none !important; }
 .role-access-note { margin: 10px 0; color: var(--text-secondary); font-size: 12px; }
 
 .login-submit {
@@ -444,10 +494,13 @@ h1 {
   width: 260px;
   flex: 0 0 260px;
   flex-direction: column;
+  height: 100vh;
+  min-height: 100vh;
   padding: 22px 14px 15px;
   background: var(--sidebar-bg);
   color: #c8d5ce;
   overflow-x: hidden;
+  box-sizing: border-box;
   transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), flex-basis 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -509,7 +562,7 @@ h1 {
 .nav-item.active > svg { stroke: #72d58b; }
 .nav-label { overflow: hidden; text-overflow: ellipsis; }
 
-.sidebar.collapsed { width: 72px; flex-basis: 72px; padding-right: 8px; padding-left: 8px; }
+.sidebar.collapsed { width: 72px; flex-basis: 72px; height: 100vh; min-height: 100vh; padding-right: 8px; padding-left: 8px; }
 .sidebar.collapsed .sidebar-brand { justify-content: center; padding: 4px 0 16px; min-height: 72px; }
 .sidebar.collapsed .nav-label,
 .sidebar.collapsed .sidebar-footer { display: none; }
@@ -530,8 +583,8 @@ h1 {
   display: flex;
   align-items: center;
   gap: 7px;
-  margin-top: auto;
-  padding: 16px 8px 2px;
+  margin-top: 10px;
+  padding: 14px 8px 2px;
   border-top: 1px solid rgb(255 255 255 / 12%);
   color: #a7b9ae;
   font-size: 9px;
@@ -1038,4 +1091,203 @@ h1 {
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* Integrated Batch Dashboard Styles */
+.batch-dashboard-section {
+  margin: 18px 0 20px;
+}
+.batch-dashboard-card {
+  padding: 18px 22px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--card-bg);
+  box-shadow: var(--shadow-soft);
+}
+.batch-dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.batch-subtitle {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.batch-performance-mini {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.batch-mini-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: var(--surface-muted);
+  border: 1px solid var(--border-color);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.batch-mini-pill strong {
+  color: var(--text-primary);
+}
+.batch-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.batch-form-inline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.batch-form-inline input {
+  width: 110px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+@media (max-width: 768px) {
+  .batch-controls-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .batch-form-inline {
+    width: 100%;
+  }
+  .batch-form-inline input {
+    flex: 1;
+  }
+}
+
+
+/* ==========================================================================
+   DEEP DIVE ANALYTICS COLLAPSIBLE (Reports Tab Secondary Charts)
+   ========================================================================== */
+.analytics-deep-dive-card {
+  margin-top: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  background: var(--card-bg);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.analytics-deep-dive-card[open] {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.analytics-deep-dive-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+  background: var(--card-bg);
+  transition: background 0.2s ease;
+  list-style: none;
+}
+
+.analytics-deep-dive-trigger::-webkit-details-marker {
+  display: none;
+}
+
+.analytics-deep-dive-trigger:hover {
+  background: var(--surface-muted);
+}
+
+.deep-dive-trigger-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.deep-dive-icon {
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--bpjs-primary);
+}
+
+.deep-dive-trigger-content strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.deep-dive-trigger-content p {
+  margin: 3px 0 0;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+}
+
+.deep-dive-arrow {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--bpjs-primary);
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(16, 185, 129, 0.12);
+  white-space: nowrap;
+}
+
+.analytics-deep-dive-card[open] .deep-dive-arrow {
+  background: var(--bpjs-primary);
+  color: #ffffff;
+}
+
+.analytics-deep-dive-body {
+  padding: 0 20px 20px;
+  border-top: 1px dashed var(--border-color);
+}
+
+/* ==========================================================================
+   SIDEBAR BOTTOM LOGOUT BUTTON
+   Identik dengan nav-item lainnya (alignment, ukuran, centering saat collapsed)
+   namun tetap tanpa background box default.
+   ========================================================================== */
+.sidebar-bottom-actions {
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+.sidebar-logout-btn {
+  color: #f87171 !important;
+  background: transparent !important;
+  border: 0 !important;
+  cursor: pointer;
+  width: 100%;
+}
+
+.sidebar-logout-btn > svg {
+  stroke: #f87171 !important;
+}
+
+.sidebar-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #fca5a5 !important;
+}
+
+.sidebar-logout-btn:hover > svg {
+  stroke: #fca5a5 !important;
 }

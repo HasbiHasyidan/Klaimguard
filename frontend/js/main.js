@@ -68,17 +68,16 @@ function showToast(message, isError = false) {
 
 function configureRoleAccess(role) {
   const canAnalyze = role === "admin_bpjs";
-  document.querySelector(".manual-form-section").classList.toggle("is-hidden", !canAnalyze);
-  document.getElementById("batchNavItem").classList.toggle("is-hidden", !canAnalyze);
-  document.getElementById("batchTab").classList.toggle("is-hidden", !canAnalyze);
-  document.getElementById("facilityNavItem").classList.toggle("is-hidden", !canAnalyze);
-  document.getElementById("facilitiesTab").classList.toggle("is-hidden", !canAnalyze);
+  document.querySelector(".manual-form-section")?.classList.toggle("is-hidden", !canAnalyze);
+  document.querySelector(".batch-dashboard-section")?.classList.toggle("is-hidden", !canAnalyze);
+  document.getElementById("batchNavItem")?.classList.toggle("is-hidden", !canAnalyze);
+  document.getElementById("batchTab")?.classList.toggle("is-hidden", !canAnalyze);
+  document.getElementById("facilityNavItem")?.classList.toggle("is-hidden", !canAnalyze);
+  document.getElementById("facilitiesTab")?.classList.toggle("is-hidden", !canAnalyze);
   const restrictedControls = [
-    ...document.querySelectorAll("#manualFormCollapse input, #manualFormCollapse select, #manualFormCollapse button"),
-    document.getElementById("toggleManualFormBtn"),
     document.getElementById("batchAuditBtn"),
     ...document.querySelectorAll("#batchAuditForm input, #batchAuditForm button, [data-batch-size]"),
-  ];
+  ].filter(Boolean);
   restrictedControls.forEach((control) => {
     control.disabled = !canAnalyze;
     control.classList.toggle("is-hidden", !canAnalyze);
@@ -92,7 +91,8 @@ function showAuthenticatedApp(user) {
   document.getElementById("appContainer").classList.remove("is-hidden");
   document.getElementById("profileName").textContent = user.user_id;
   const roleLabels = { admin_bpjs: "Admin Verifikator", petugas_klaim_rs: "Petugas Klaim RS" };
-  document.getElementById("profileRole").textContent = roleLabels[user.role] || user.role;
+  const roleEl = document.getElementById("profileRole");
+  if (roleEl) roleEl.textContent = roleLabels[user.role] || user.role;
   initTheme();
   initSidebarToggle(user.role);
   if (user.role === "petugas_klaim_rs") {
@@ -172,15 +172,26 @@ function bindLogin() {
     const form = new FormData(event.currentTarget);
     const button = document.getElementById("loginButton");
     const error = document.getElementById("loginError");
+    const originalText = button.textContent;
     button.disabled = true;
+    button.textContent = "Memverifikasi...";
     error.textContent = "";
     try {
-      const user = await login(String(form.get("username")).trim(), String(form.get("password")));
+      // Memberikan jeda minimal 700ms agar efek verifikasi terlihat jelas dan natural
+      const [user] = await Promise.all([
+        login(String(form.get("username")).trim(), String(form.get("password"))),
+        new Promise((resolve) => setTimeout(resolve, 750))
+      ]);
       showAuthenticatedApp(user);
     } catch (loginError) {
-      error.textContent = loginError.message;
+      if (loginError.message && loginError.message.includes("Failed to fetch")) {
+        error.textContent = "Gagal terhubung ke server backend. Pastikan server aktif.";
+      } else {
+        error.textContent = loginError.message;
+      }
     } finally {
       button.disabled = false;
+      button.textContent = originalText;
     }
   });
   document.getElementById("logoutButton").addEventListener("click", async () => {
@@ -399,6 +410,7 @@ function bindRsResponseActions(id) {
 
 function setConnectionStatus(connected, totalClaims = 0) {
   const status = document.getElementById("connectionStatus");
+  if (!status) return;
   const text = status.querySelector(".status-text");
   const dot = status.querySelector(".status-dot");
   if (connected) {
@@ -492,12 +504,12 @@ function bindFilters() {
       document.querySelectorAll("[data-batch-size]").forEach((item) => item.classList.toggle("is-active", item === chip));
     });
   });
-  document.getElementById("toggleManualFormBtn").addEventListener("click", (event) => {
+  document.getElementById("toggleManualFormBtn")?.addEventListener("click", (event) => {
     const button = event.currentTarget;
     const expanded = button.getAttribute("aria-expanded") !== "true";
     button.setAttribute("aria-expanded", String(expanded));
-    document.getElementById("manualFormCollapse").classList.toggle("is-open", expanded);
-    document.getElementById("manualFormCollapse").setAttribute("aria-hidden", String(!expanded));
+    document.getElementById("manualFormCollapse")?.classList.toggle("is-open", expanded);
+    document.getElementById("manualFormCollapse")?.setAttribute("aria-hidden", String(!expanded));
   });
   document.getElementById("refreshAuditButton").addEventListener("click", loadAuditHistory);
   document.getElementById("refreshAnalyticsBtn")?.addEventListener("click", loadReportData);
@@ -536,7 +548,7 @@ function bindFilters() {
       applyAnalyticsFilter();
     });
   });
-  document.getElementById("claimForm").addEventListener("submit", analyzeManualClaim);
+  document.getElementById("claimForm")?.addEventListener("submit", analyzeManualClaim);
   document.getElementById("facilityCreateForm").addEventListener("submit", submitFacilityForm);
   document.getElementById("facilityClaimPicker").addEventListener("change", updateSelectedFacilityClaims);
   document.getElementById("facilityClaimSearch").addEventListener("input", () => {
@@ -820,10 +832,27 @@ function applyAnalyticsFilter() {
   renderAllAnalyticsCharts();
 }
 
+function getChartThemeColors() {
+  const isDark = document.body.classList.contains("dark-mode");
+  return {
+    textColor: isDark ? "#94a3b8" : "#475569",
+    gridColor: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.06)",
+    cardBg: isDark ? "#1b2922" : "#ffffff",
+    titleColor: isDark ? "#f8fafc" : "#1e293b",
+  };
+}
+
+window.addEventListener("klaimguard:theme-change", () => {
+  if (state.analyticsData) {
+    renderAllAnalyticsCharts();
+  }
+});
+
 function renderAllAnalyticsCharts() {
   const analytics = state.analyticsData;
   if (!analytics || typeof window.Chart === "undefined") return;
   const filterCat = state.analyticsFilter.category;
+  const chartTheme = getChartThemeColors();
 
   // Chart 1: Financial Comparison (Grouped Bar)
   financialComparisonChart?.destroy();
@@ -881,7 +910,7 @@ function renderAllAnalyticsCharts() {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: "top", labels: { boxWidth: 12, font: { size: 11, family: "Plus Jakarta Sans" } } },
+          legend: { position: "top", labels: { color: chartTheme.textColor, boxWidth: 12, font: { size: 11, family: "Plus Jakarta Sans" } } },
           tooltip: {
             callbacks: {
               label: (context) => `${context.dataset.label}: ${formatIdr(context.raw)}`,
@@ -892,11 +921,16 @@ function renderAllAnalyticsCharts() {
           y: {
             beginAtZero: true,
             ticks: {
+              color: chartTheme.textColor,
               callback: (value) => "Rp " + formatMiliar(value),
               font: { size: 10 },
             },
+            grid: { color: chartTheme.gridColor },
           },
-          x: { ticks: { font: { size: 11, weight: "600" } } },
+          x: {
+            ticks: { color: chartTheme.textColor, font: { size: 11, weight: "600" } },
+            grid: { color: chartTheme.gridColor },
+          },
         },
       },
     });
@@ -943,7 +977,7 @@ function renderAllAnalyticsCharts() {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: "top", labels: { boxWidth: 12, font: { size: 11 } } },
+          legend: { position: "top", labels: { color: chartTheme.textColor, boxWidth: 12, font: { size: 11 } } },
           tooltip: {
             callbacks: {
               afterLabel: (ctx) => {
@@ -958,22 +992,27 @@ function renderAllAnalyticsCharts() {
             type: "linear",
             position: "left",
             beginAtZero: true,
-            title: { display: true, text: "Jumlah Klaim", font: { size: 10 } },
-            ticks: { font: { size: 10 } },
+            title: { display: true, text: "Jumlah Klaim", color: chartTheme.textColor, font: { size: 10 } },
+            ticks: { color: chartTheme.textColor, font: { size: 10 } },
+            grid: { color: chartTheme.gridColor },
           },
           y1: {
             type: "linear",
             position: "right",
             min: 0,
             max: 100,
-            title: { display: true, text: "% Anomali", font: { size: 10 } },
+            title: { display: true, text: "% Anomali", color: chartTheme.textColor, font: { size: 10 } },
             ticks: {
+              color: chartTheme.textColor,
               callback: (v) => v + "%",
               font: { size: 10 },
             },
             grid: { drawOnChartArea: false },
           },
-          x: { ticks: { font: { size: 10 } } },
+          x: {
+            ticks: { color: chartTheme.textColor, font: { size: 10 } },
+            grid: { color: chartTheme.gridColor },
+          },
         },
       },
     });
@@ -996,6 +1035,7 @@ function renderAllAnalyticsCharts() {
           {
             data: bucketCounts,
             backgroundColor: ["#10b981", "#3b82f6", "#f59e0b", "#ef4444"],
+            borderColor: chartTheme.cardBg,
             borderWidth: 2,
             hoverOffset: 6,
           },
@@ -1006,7 +1046,7 @@ function renderAllAnalyticsCharts() {
         maintainAspectRatio: false,
         cutout: "60%",
         plugins: {
-          legend: { position: "bottom", labels: { boxWidth: 12, font: { size: 10 } } },
+          legend: { position: "bottom", labels: { color: chartTheme.textColor, boxWidth: 12, font: { size: 10 } } },
           tooltip: {
             callbacks: {
               label: (ctx) => {
@@ -1069,18 +1109,22 @@ function renderAllAnalyticsCharts() {
           x: {
             beginAtZero: true,
             ticks: {
+              color: chartTheme.textColor,
               callback: (v) => "Rp " + formatMiliar(v),
               font: { size: 10 },
             },
+            grid: { color: chartTheme.gridColor },
           },
           y: {
             ticks: {
+              color: chartTheme.textColor,
               font: { size: 10, weight: "600" },
               callback: function(val) {
                 const label = this.getLabelForValue(val);
                 return label.length > 28 ? label.substring(0, 26) + "…" : label;
               },
             },
+            grid: { color: chartTheme.gridColor },
           },
         },
       },
@@ -1119,7 +1163,8 @@ async function loadReportData() {
       anomalyBreakdownEl.textContent = `${formatNumber(data.upcoding_count)} Upcoding · ${formatNumber(data.unbundling_count)} Unbundling`;
     }
     if (costDisparityEl) {
-      const avgFraud = data.fraud_claims ? fin.fraud_charge / data.fraud_claims : 0;
+      const totalFraudCharge = (fin.upcoding_charge || 0) + (fin.unbundling_charge || 0);
+      const avgFraud = data.fraud_claims ? totalFraudCharge / data.fraud_claims : 0;
       costDisparityEl.textContent = formatIdr(avgFraud);
     }
 

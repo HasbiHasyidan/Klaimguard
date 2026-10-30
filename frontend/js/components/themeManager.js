@@ -15,6 +15,7 @@ function applyTheme(theme) {
     toggle.setAttribute("aria-label", isDark ? "Aktifkan mode terang" : "Aktifkan mode gelap");
   }
   localStorage.setItem(THEME_STORAGE_KEY, theme);
+  window.dispatchEvent(new CustomEvent("klaimguard:theme-change", { detail: { theme, isDark } }));
 }
 
 export function initTheme() {

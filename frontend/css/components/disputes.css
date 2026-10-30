@@ -589,21 +589,73 @@
 }
 .dispute-summary-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(110px, 1fr));
-  gap: 10px;
-  margin: 0 0 16px;
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  gap: 14px;
+  margin: 0 0 20px;
 }
-.dispute-summary-grid article {
-  display: grid;
-  gap: 7px;
-  padding: 13px 15px;
+@media (max-width: 960px) {
+  .dispute-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 520px) {
+  .dispute-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.dispute-kpi-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 18px;
   border: 1px solid var(--border-color, #e4e9ee);
+  border-left: 4px solid var(--kpi-accent, #10b981);
   border-radius: 12px;
-  background: var(--surface, #fff);
+  background: var(--card-bg, #fff);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: transform 180ms ease, box-shadow 180ms ease;
 }
-.dispute-summary-grid span { color: var(--text-secondary); font-size: 11px; }
-.dispute-summary-grid strong { color: var(--text-primary); font-size: 21px; }
-.dispute-summary-grid .is-alert strong { color: #b45309; }
+.dispute-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+.dispute-kpi-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+.dispute-kpi-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+.badge-warning { background: rgba(245, 158, 11, 0.12); color: #b45309; }
+.badge-info { background: rgba(2, 132, 199, 0.12); color: #0284c7; }
+.badge-success { background: rgba(16, 185, 129, 0.12); color: #059669; }
+.badge-danger { background: rgba(239, 68, 68, 0.12); color: #dc2626; }
+body.dark-mode .badge-warning { color: #fcd34d; background: rgba(245, 158, 11, 0.2); }
+body.dark-mode .badge-info { color: #7dd3fc; background: rgba(2, 132, 199, 0.2); }
+body.dark-mode .badge-success { color: #6ee7b7; background: rgba(16, 185, 129, 0.2); }
+body.dark-mode .badge-danger { color: #fca5a5; background: rgba(239, 68, 68, 0.2); }
+.dispute-kpi-meta {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.dispute-kpi-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.dispute-kpi-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
 .dispute-versions, .dispute-comments { margin-top: 18px; }
 .dispute-versions h3, .dispute-comments h3 { margin: 0 0 9px; font-size: 13px; }
 .dispute-versions details, .dispute-comments li { padding: 10px; border: 1px solid var(--border-color, #e4e9ee); border-radius: 9px; margin: 7px 0; }
@@ -801,3 +853,194 @@
 .rs-timeline li { display:grid; gap:3px; }
 .rs-timeline li span,.rs-locked-note { color:var(--text-secondary); }
 @media(max-width:900px) { .rs-clarification-layout { grid-template-columns:1fr; } }
+
+
+/* ==========================================================================
+   DELIVERY-TRACKING STYLE STEPPER (Progress Pipeline BPJS -> RS)
+   ========================================================================== */
+.rs-stepper {
+  display: flex !important;
+  align-items: flex-start;
+  justify-content: space-between;
+  position: relative;
+  margin-bottom: 20px;
+  padding: 16px 14px 12px;
+  background: var(--bg-main, #0b1f17);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  overflow-x: auto;
+  gap: 6px;
+}
+
+.stepper-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  min-width: 96px;
+  text-align: center;
+}
+
+.stepper-node-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.stepper-line {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 3px;
+  background: rgba(255, 255, 255, 0.12);
+  z-index: 1;
+}
+
+:root:not([data-theme="dark"]) .stepper-line {
+  background: #e2e8f0;
+}
+
+.stepper-line-left {
+  left: 0;
+  right: 50%;
+}
+
+.stepper-line-right {
+  left: 50%;
+  right: 0;
+}
+
+.stepper-line.line-active {
+  background: var(--bpjs-primary, #10b981) !important;
+}
+
+.stepper-node {
+  position: relative;
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--card-bg, #102a20);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+}
+
+:root:not([data-theme="dark"]) .stepper-node {
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
+.stepper-item.is-done .stepper-node {
+  background: #10b981;
+  border-color: #10b981;
+  color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.28);
+}
+
+.stepper-item.is-active .stepper-node {
+  background: var(--bpjs-primary, #059669);
+  border-color: #34d399;
+  color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.35);
+  transform: scale(1.12);
+  font-weight: 800;
+}
+
+.stepper-item.is-pending .stepper-node {
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.stepper-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stepper-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.25;
+}
+
+.stepper-item.is-pending .stepper-title {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.stepper-desc {
+  font-size: 9.5px;
+  color: var(--text-secondary);
+  line-height: 1.2;
+}
+
+/* ==========================================================================
+   2-COLUMN STRUCTURED MODAL LAYOUT
+   ========================================================================== */
+.dispute-detail-panel {
+  width: min(1180px, 96vw) !important;
+  max-width: 1200px;
+}
+
+.dispute-modal-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.dispute-col-left,
+.dispute-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.dispute-card-block {
+  padding: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--card-bg);
+}
+
+.dispute-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.dispute-badge-info {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dispute-card-block .dispute-letter-editor {
+  min-height: 220px;
+  max-height: 38vh;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 900px) {
+  .dispute-modal-grid {
+    grid-template-columns: 1fr;
+  }
+}
