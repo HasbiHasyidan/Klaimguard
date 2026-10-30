@@ -24,6 +24,8 @@ services:
     volumes:
       # Data persisten SQLite, model XGBoost, ChromaDB, dan berkas upload rumah sakit
       - klaimguard-data:/data
+      # Mount folder frontend agar pembaruan UI langsung aktif saat git pull
+      - ./frontend:/app/frontend:ro
       # Mount folder regulasi PDF resmi (read-only)
       - ./backend/regulation_docs:/app/backend/regulation_docs:ro
     restart: unless-stopped
